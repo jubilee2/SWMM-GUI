@@ -29,3 +29,31 @@ SWMM is a dynamic hydrology-hydraulic water quality simulation model. It is used
 
 ## Find Out More
 The source code distributed here is identical to the code found at the official [SWMM Website](http://www2.epa.gov/water-research/storm-water-management-model-swmm).
+
+---
+
+## Web-based SWMM Runner
+
+This project also contains a Node.js web server for running SWMM simulations and viewing results through a web browser.
+
+### Server Setup
+
+1.  **Install Node.js:** Make sure you have a recent version of Node.js installed.
+2.  **Install Dependencies:** Open a terminal in the project root and run `npm install`.
+
+### Providing the SWMM Engine
+
+This server requires the official SWMM command-line executable to run simulations.
+
+1.  **Download SWMM:** Visit the [official EPA SWMM Website](https://www.epa.gov/water-research/storm-water-management-model-swmm) and download the latest version of the SWMM installation package for your operating system (Windows, Linux, or macOS).
+2.  **Locate the Executable:**
+    *   For **Windows**, find the `swmm5.exe` file.
+    *   For **Linux** or **macOS**, the executable is typically named `swmm5`.
+3.  **Place the Executable:** Copy the SWMM executable file into the root directory of this project. The server is configured to look for it there.
+
+### Running the Server
+
+Once the setup is complete, you can start the server by running:
+`node server.js`
+
+The server will be available at `http://localhost:3000`.
