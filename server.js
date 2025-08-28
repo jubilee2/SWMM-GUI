@@ -85,6 +85,80 @@ app.get('/', (req, res) => {
   res.send('Hello World! The server is running.');
 });
 
+// Endpoint to parse coordinates from an .inp file
+app.get('/api/mapdata/:fileName', (req, res) => {
+    const fileName = req.params.fileName;
+
+    // Basic security
+    if (fileName.includes('..')) {
+        return res.status(400).json({ error: 'Invalid file name.' });
+    }
+
+    const filePath = path.join(uploadsDir, fileName);
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: 'Input file not found.' });
+    }
+
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const lines = fileContent.split(/\r?\n/);
+
+    let inCoordinatesSection = false;
+    const features = [];
+
+    for (const line of lines) {
+        if (line.trim().toLowerCase() === '[coordinates]') {
+            inCoordinatesSection = true;
+            continue;
+        }
+        if (line.trim().startsWith('[')) {
+            // Stop if we hit another section
+            if (inCoordinatesSection) break;
+            continue;
+        }
+
+        if (inCoordinatesSection && line.trim() && !line.trim().startsWith(';')) {
+            const parts = line.trim().split(/\s+/);
+            // Node         X-Coord            Y-Coord
+            if (parts.length >= 3) {
+                const [name, x, y] = parts;
+                features.push({
+                    type: 'Feature',
+                    properties: { name: name },
+                    geometry: {
+                        type: 'Point',
+                        // Note: GeoJSON is [longitude, latitude], but SWMM is often projected.
+                        // We are assuming X=lon, Y=lat for now. This might need adjustment.
+                        coordinates: [parseFloat(x), parseFloat(y)]
+                    }
+                });
+            }
+        }
+    }
+
+    res.json({
+        type: 'FeatureCollection',
+        features: features
+    });
+});
+
+// Endpoint to get a result file
+app.get('/api/results/:fileName', (req, res) => {
+    const fileName = req.params.fileName;
+
+    // Basic security: prevent directory traversal
+    if (fileName.includes('..')) {
+        return res.status(400).send('Invalid file name.');
+    }
+
+    const filePath = path.join(uploadsDir, fileName);
+
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).send('File not found.');
+    }
+});
+
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });

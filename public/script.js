@@ -4,8 +4,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const runButton = document.getElementById('runButton');
     const statusDiv = document.getElementById('status');
     const resultsDiv = document.getElementById('results');
+    const mapDiv = document.getElementById('map');
 
     let uploadedFileName = null;
+    let map = null;
+    let mapLayer = null;
+
+    // Initialize the map
+    function initMap() {
+        if (map) return;
+        map = L.map(mapDiv).setView([40, -95], 4); // Default view
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+    }
 
     function logStatus(message, isError = false) {
         const p = document.createElement('p');
@@ -70,8 +82,48 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (response.ok) {
-                logStatus('Simulation finished!');
-                resultsDiv.innerHTML = `<pre>${result.log}</pre>`;
+                logStatus('Simulation finished! Fetching report...');
+                resultsDiv.innerHTML = `<h4>Simulation Log</h4><pre>${result.log}</pre>`;
+
+                // Fetch and display the report file
+                try {
+                    const reportResponse = await fetch(`/api/results/${result.reportFile}`);
+                    if (reportResponse.ok) {
+                        const reportText = await reportResponse.text();
+                        resultsDiv.innerHTML += `<h4>Report File (${result.reportFile})</h4><pre>${reportText}</pre>`;
+                        logStatus('Simulation and report retrieval complete.');
+                    } else {
+                        throw new Error(`Failed to fetch report file: ${reportResponse.statusText}`);
+                    }
+                } catch (reportError) {
+                     logStatus(`Error fetching report: ${reportError.message}`, true);
+                }
+
+                // Fetch and display map data
+                logStatus('Fetching map data...');
+                try {
+                    const mapDataResponse = await fetch(`/api/mapdata/${uploadedFileName}`);
+                    if (mapDataResponse.ok) {
+                        const geojsonData = await mapDataResponse.json();
+                        if (mapLayer) {
+                            map.removeLayer(mapLayer);
+                        }
+                        mapLayer = L.geoJSON(geojsonData, {
+                            onEachFeature: function (feature, layer) {
+                                layer.bindPopup(feature.properties.name);
+                            }
+                        }).addTo(map);
+                        if (geojsonData.features.length > 0) {
+                            map.fitBounds(mapLayer.getBounds());
+                        }
+                        logStatus('Map data loaded.');
+                    } else {
+                         throw new Error(`Failed to fetch map data: ${mapDataResponse.statusText}`);
+                    }
+                } catch (mapError) {
+                    logStatus(`Error fetching map data: ${mapError.message}`, true);
+                }
+
             } else {
                 throw new Error(result.details || result.error || 'Simulation failed');
             }
@@ -81,4 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
             runButton.disabled = false;
         }
     });
+
+    initMap();
 });
