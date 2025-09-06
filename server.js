@@ -31,9 +31,12 @@ app.post('/api/parse', upload.single('file'), (req, res) => {
   try {
     const result = parseInp(req.file.path);
     fs.unlink(req.file.path, () => {});
+    if (!result || Object.keys(result).length === 0) {
+      return res.status(422).json({ error: 'Invalid or empty INP file' });
+    }
     res.json(result);
   } catch (err) {
-    res.status(400).json({ error: 'Parsing failed' });
+    res.status(422).json({ error: `Parsing failed: ${err.message}` });
   }
 });
 

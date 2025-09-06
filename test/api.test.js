@@ -15,5 +15,13 @@ describe('POST /api/parse', () => {
   it('returns 400 when no file uploaded', async () => {
     const res = await request(app).post('/api/parse');
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('No file uploaded');
+  });
+
+  it('returns 422 for invalid INP file', async () => {
+    const file = path.join(__dirname, 'data', 'invalid.inp');
+    const res = await request(app).post('/api/parse').attach('file', file);
+    expect(res.status).toBe(422);
+    expect(res.body.error).toMatch(/invalid or empty/i);
   });
 });
