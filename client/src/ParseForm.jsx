@@ -10,6 +10,12 @@ function ParseForm() {
     const file = e.target.elements.file.files[0]
     if (!file) return
 
+    if (!file.name.toLowerCase().endsWith('.inp')) {
+      setError('Invalid file type. Please upload a .inp file.')
+      setData(null)
+      return
+    }
+
     const formData = new FormData()
     formData.append('file', file)
     setLoading(true)
@@ -34,7 +40,7 @@ function ParseForm() {
     <div>
       <h2>Parse INP File</h2>
       <form onSubmit={handleSubmit}>
-        <input type="file" name="file" />
+        <input type="file" name="file" accept=".inp" />
         <button type="submit">Upload</button>
       </form>
       {loading && <p>Parsing...</p>}
