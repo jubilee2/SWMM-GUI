@@ -28,6 +28,11 @@ app.post('/api/parse', upload.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
+  const ext = path.extname(req.file.originalname).toLowerCase();
+  if (ext !== '.inp') {
+    fs.unlink(req.file.path, () => {});
+    return res.status(400).json({ error: 'Unsupported file type' });
+  }
   try {
     const result = parseInp(req.file.path);
     fs.unlink(req.file.path, () => {});

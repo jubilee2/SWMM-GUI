@@ -27,6 +27,14 @@ describe('POST /api/parse', () => {
     expect(res.body.error).toMatch(/invalid or empty/i);
   });
 
+  it('returns 400 for unsupported file type', async () => {
+    const { default: app } = await import('../server.js');
+    const file = path.join(__dirname, 'data', 'sample.txt');
+    const res = await request(app).post('/api/parse').attach('file', file);
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Unsupported file type');
+  });
+
   it('returns 422 when parser throws an error', async () => {
     vi.resetModules();
     const parser = require('../server/inpParser.js');
