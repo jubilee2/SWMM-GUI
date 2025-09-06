@@ -6,7 +6,6 @@ function ResultsView() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const canvasRef = useRef(null)
-  const chartRef = useRef(null)
 
   useEffect(() => {
     setLoading(true)
@@ -42,7 +41,6 @@ function ResultsView() {
       },
     })
 
-    chartRef.current = chart
     return () => chart.destroy()
   }, [results])
 
