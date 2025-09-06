@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
+const { parseInp } = require('./server/inpParser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +20,20 @@ app.get('/api/output', (req, res) => {
     }
     res.sendFile(filePath);
   });
+});
+
+// Endpoint parsing uploaded INP files
+const upload = multer({ storage: multer.memoryStorage() });
+app.post('/api/parse', upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No file uploaded');
+  }
+  try {
+    const data = parseInp(req.file.buffer.toString('utf8'));
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Fallback to index.html for SPA routing
