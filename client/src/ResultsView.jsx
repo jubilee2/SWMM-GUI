@@ -3,14 +3,25 @@ import { Chart } from 'chart.js/auto'
 
 function ResultsView() {
   const [results, setResults] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
 
   useEffect(() => {
+    setLoading(true)
+    setError(null)
     fetch('/data/sample-swmm-result.json')
       .then((res) => res.json())
-      .then((json) => setResults(json))
-      .catch((err) => console.error('Failed to load results', err))
+      .then((json) => {
+        setResults(json)
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error('Failed to load results', err)
+        setError('Failed to load results')
+        setLoading(false)
+      })
   }, [])
 
   useEffect(() => {
@@ -35,7 +46,9 @@ function ResultsView() {
     return () => chart.destroy()
   }, [results])
 
-  if (!results) return <div>Loading results...</div>
+  if (loading) return <div>Loading results...</div>
+  if (error) return <div className="error-banner">{error}</div>
+  if (!results) return null
 
   return (
     <div>
