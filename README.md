@@ -50,6 +50,8 @@ npm --prefix client run dev
 npm start
 ```
 
+The Vite dev server proxies `/api` requests to `http://localhost:3000` during development.
+
 ### Production
 
 Build the React client and serve the compiled app with Express:
