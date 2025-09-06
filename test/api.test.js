@@ -24,4 +24,11 @@ describe('POST /api/parse', () => {
     expect(res.status).toBe(422);
     expect(res.body.error).toMatch(/invalid or empty/i);
   });
+
+  it('returns 400 for unsupported file type', async () => {
+    const file = path.join(__dirname, 'data', 'sample.txt');
+    const res = await request(app).post('/api/parse').attach('file', file);
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Unsupported file type');
+  });
 });
