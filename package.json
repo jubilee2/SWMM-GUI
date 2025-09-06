@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "build": "npm --prefix client run build"
+    "build": "npm --prefix client run build",
+    "lint": "npm --prefix client run lint"
   },
   "keywords": [],
   "author": "",
