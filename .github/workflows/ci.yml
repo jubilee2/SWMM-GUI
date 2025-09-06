@@ -14,5 +14,6 @@ jobs:
       - run: npm ci
       - run: npm --prefix client ci
       - run: npm --prefix client run lint
+      - run: npm --prefix client test
       - run: npm run build
 
