@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import MapView from './MapView.jsx'
 
 function App() {
   const [output, setOutput] = useState('Loading...')
@@ -15,6 +16,7 @@ function App() {
     <div>
       <h1>SWMM Output</h1>
       <pre className="output">{output}</pre>
+      <MapView />
     </div>
   )
 }
