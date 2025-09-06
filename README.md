@@ -34,7 +34,7 @@ The source code distributed here is identical to the code found at the official 
 
 ### Install Dependencies
 
-Install server and client dependencies from the project root:
+Install Node dependencies for both the Express backend and the React client from the project root:
 
 ```bash
 npm install
@@ -43,7 +43,7 @@ npm --prefix client install
 
 ### Development
 
-Run the React dev server and Express backend in separate terminals:
+Start the Vite dev server for the React client and the Express API in separate terminals:
 
 ```bash
 npm --prefix client run dev
@@ -54,7 +54,7 @@ The Vite dev server proxies `/api` requests to `http://localhost:3000` during de
 
 ### Production
 
-Build the React client and serve the compiled app with Express:
+Build the React client and then launch the Express server to host the compiled app:
 
 ```bash
 npm run build
@@ -63,6 +63,5 @@ npm start
 
 ### API Output
 
-The Express server exposes an `/api/output` endpoint that returns the contents of `swmm-output.txt`.  
-This sample output file resides in the project root and is served directly to demonstrate delivering a
-SWMM result through the API.
+The Express server exposes an `/api/output` endpoint that returns the contents of `swmm-output.txt`.
+This sample output file lives in the project root and demonstrates delivering a SWMM result through the API.
