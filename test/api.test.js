@@ -1,10 +1,10 @@
 import path from 'path';
 import request from 'supertest';
-import { describe, it, expect } from 'vitest';
-import app from '../server.js';
+import { describe, it, expect, vi } from 'vitest';
 
 describe('POST /api/parse', () => {
   it('parses uploaded INP file', async () => {
+    const { default: app } = await import('../server.js');
     const file = path.join(__dirname, 'data', 'sample.inp');
     const res = await request(app).post('/api/parse').attach('file', file);
     expect(res.status).toBe(200);
@@ -13,12 +13,14 @@ describe('POST /api/parse', () => {
   });
 
   it('returns 400 when no file uploaded', async () => {
+    const { default: app } = await import('../server.js');
     const res = await request(app).post('/api/parse');
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('No file uploaded');
   });
 
   it('returns 422 for invalid INP file', async () => {
+    const { default: app } = await import('../server.js');
     const file = path.join(__dirname, 'data', 'invalid.inp');
     const res = await request(app).post('/api/parse').attach('file', file);
     expect(res.status).toBe(422);
@@ -26,9 +28,26 @@ describe('POST /api/parse', () => {
   });
 
   it('returns 400 for unsupported file type', async () => {
+    const { default: app } = await import('../server.js');
     const file = path.join(__dirname, 'data', 'sample.txt');
     const res = await request(app).post('/api/parse').attach('file', file);
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('Unsupported file type');
+  });
+
+  it('returns 422 when parser throws an error', async () => {
+    vi.resetModules();
+    const parser = require('../server/inpParser.js');
+    const spy = vi
+      .spyOn(parser, 'parseInp')
+      .mockImplementation(() => {
+        throw new Error('boom');
+      });
+    const app = require('../server.js');
+    const file = path.join(__dirname, 'data', 'sample.inp');
+    const res = await request(app).post('/api/parse').attach('file', file);
+    expect(res.status).toBe(422);
+    expect(res.body.error).toBe('Parsing failed: boom');
+    spy.mockRestore();
   });
 });
