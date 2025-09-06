@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import './MapView.css';
 
 function MapView() {
   const mapRef = useRef(null);
@@ -16,7 +17,7 @@ function MapView() {
     };
   }, []);
 
-  return <div ref={mapRef} style={{ height: '400px', width: '100%' }} />;
+  return <div ref={mapRef} className="map-container" />;
 }
 
 export default MapView;
