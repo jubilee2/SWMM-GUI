@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,7 +11,13 @@ app.use(express.static(distPath));
 
 // Endpoint serving fixed SWMM output file
 app.get('/api/output', (req, res) => {
-  res.sendFile(path.join(__dirname, 'swmm-output.txt'));
+  const filePath = path.join(__dirname, 'swmm-output.txt');
+  fs.access(filePath, fs.constants.R_OK, (err) => {
+    if (err) {
+      return res.status(404).send('Output file not found');
+    }
+    res.sendFile(filePath);
+  });
 });
 
 // Fallback to index.html for SPA routing
