@@ -29,3 +29,38 @@ SWMM is a dynamic hydrology-hydraulic water quality simulation model. It is used
 
 ## Find Out More
 The source code distributed here is identical to the code found at the official [SWMM Website](http://www2.epa.gov/water-research/storm-water-management-model-swmm).
+
+## Setup and Usage
+
+### Install Dependencies
+
+Install server and client dependencies from the project root:
+
+```bash
+npm install
+npm --prefix client install
+```
+
+### Development
+
+Run the React dev server and Express backend in separate terminals:
+
+```bash
+npm --prefix client run dev
+npm start
+```
+
+### Production
+
+Build the React client and serve the compiled app with Express:
+
+```bash
+npm run build
+npm start
+```
+
+### API Output
+
+The Express server exposes an `/api/output` endpoint that returns the contents of `swmm-output.txt`.  
+This sample output file resides in the project root and is served directly to demonstrate delivering a
+SWMM result through the API.
