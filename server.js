@@ -1,6 +1,9 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+const { parseInp } = require('./server/inpParser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +21,20 @@ app.get('/api/output', (req, res) => {
     }
     res.sendFile(filePath);
   });
+});
+
+// Endpoint to parse uploaded SWMM input files
+app.post('/api/parse', upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No file uploaded');
+  }
+  try {
+    const data = await parseInp(req.file.path);
+    fs.unlink(req.file.path, () => {});
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Fallback to index.html for SPA routing
