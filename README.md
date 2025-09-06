@@ -65,3 +65,11 @@ npm start
 
 The Express server exposes an `/api/output` endpoint that returns the contents of `swmm-output.txt`.
 This sample output file lives in the project root and demonstrates delivering a SWMM result through the API.
+
+### Server Tests
+
+Run backend unit tests with:
+
+```bash
+npm run test:server
+```
