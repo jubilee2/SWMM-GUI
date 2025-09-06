@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import MapView from './MapView'
 import ResultsView from './ResultsView'
+import ParseForm from './ParseForm'
 
 function App() {
   const [output, setOutput] = useState('Loading...')
@@ -17,6 +18,7 @@ function App() {
     <div>
       <h1>SWMM Output</h1>
       <pre className="output">{output}</pre>
+      <ParseForm />
       <MapView />
       <ResultsView />
     </div>
