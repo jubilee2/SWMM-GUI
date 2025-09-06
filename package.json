@@ -5,13 +5,19 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "build": "npm --prefix client run build"
+    "build": "npm --prefix client run build",
+    "test:server": "vitest run --dir test"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "supertest": "^6.3.3",
+    "vitest": "^1.2.0"
   }
 }
