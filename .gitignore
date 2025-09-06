@@ -67,3 +67,9 @@ __recovery/
 
 # Boss dependency manager vendor folder https://github.com/HashLoad/boss
 modules/
+
+# Node.js
+node_modules/
+npm-debug.log*
+client/node_modules/
+client/dist/
