@@ -1,19 +1,18 @@
 import { render } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
-const mapInstance = {
-  setView: vi.fn().mockReturnThis(),
-  remove: vi.fn(),
-};
-const tileLayerInstance = { addTo: vi.fn() };
+const mapInstance = { remove: vi.fn() };
+
+vi.mock('proj4leaflet', () => ({}));
 
 vi.mock('leaflet', () => ({
   default: {
     map: vi.fn((el) => {
-      el.classList.add('leaflet-container');
+      const element = typeof el === 'string' ? document.getElementById(el) : el;
+      if (element) element.classList.add('leaflet-container');
       return mapInstance;
     }),
-    tileLayer: vi.fn(() => tileLayerInstance),
+    Proj: { CRS: vi.fn() },
   },
 }));
 
