@@ -31,6 +31,14 @@ function parseInp(filePath) {
     }
   }
 
+  if (sections.COORDINATES) {
+    sections.COORDINATES = sections.COORDINATES.map(([id, x, y]) => ({
+      id,
+      x: Number(x),
+      y: Number(y),
+    }));
+  }
+
   return sections;
 }
 

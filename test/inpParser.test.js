@@ -13,6 +13,7 @@ describe('parseInp', () => {
     expect(result).toHaveProperty('COORDINATES');
     expect(result.JUNCTIONS[0][0]).toBe('J1');
     expect(result.CONDUITS[0][1]).toBe('J1');
-    expect(result.COORDINATES.length).toBe(2);
+    expect(result.COORDINATES).toHaveLength(2);
+    expect(result.COORDINATES[0]).toEqual({ id: 'J1', x: 100, y: 100 });
   });
 });

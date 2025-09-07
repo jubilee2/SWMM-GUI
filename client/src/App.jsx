@@ -6,6 +6,7 @@ import ParseForm from './ParseForm'
 
 function App() {
   const [output, setOutput] = useState('Loading...')
+  const [coordinates, setCoordinates] = useState([])
 
   useEffect(() => {
     fetch('/api/output')
@@ -18,8 +19,8 @@ function App() {
     <div>
       <h1>SWMM Output</h1>
       <pre className="output">{output}</pre>
-      <ParseForm />
-      <MapView />
+      <ParseForm onParsed={setCoordinates} />
+      <MapView coordinates={coordinates} />
       <ResultsView />
     </div>
   )

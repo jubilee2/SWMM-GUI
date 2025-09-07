@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function ParseForm() {
+function ParseForm({ onParsed }) {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -28,6 +28,7 @@ function ParseForm() {
       if (!res.ok) throw new Error('Upload failed')
       const json = await res.json()
       setData(json)
+      if (onParsed) onParsed(json.coordinates || [])
     } catch (err) {
       setError(err.message)
       setData(null)

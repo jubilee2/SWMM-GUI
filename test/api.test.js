@@ -10,6 +10,8 @@ describe('POST /api/parse', () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('JUNCTIONS');
     expect(res.body.JUNCTIONS[0][0]).toBe('J1');
+    expect(res.body).toHaveProperty('coordinates');
+    expect(res.body.coordinates[0]).toEqual({ id: 'J1', x: 100, y: 100 });
   });
 
   it('returns 400 when no file uploaded', async () => {
