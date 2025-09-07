@@ -14,6 +14,14 @@ describe('POST /api/parse', () => {
     expect(res.body.coordinates[0]).toEqual({ id: 'J1', x: 100, y: 100 });
   });
 
+  it('returns example coordinates when none are provided', async () => {
+    const { default: app } = await import('../server.js');
+    const file = path.join(__dirname, 'data', 'nocoords.inp');
+    const res = await request(app).post('/api/parse').attach('file', file);
+    expect(res.status).toBe(200);
+    expect(res.body.coordinates).toEqual([{ id: 'EX1', x: 0, y: 0 }]);
+  });
+
   it('returns 400 when no file uploaded', async () => {
     const { default: app } = await import('../server.js');
     const res = await request(app).post('/api/parse');

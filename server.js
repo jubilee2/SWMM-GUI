@@ -39,7 +39,12 @@ app.post('/api/parse', upload.single('file'), (req, res) => {
     if (!result || Object.keys(result).length === 0) {
       return res.status(422).json({ error: 'Invalid or empty INP file' });
     }
-    res.json({ ...result, coordinates: result.COORDINATES || [] });
+    const exampleCoords = [{ id: 'EX1', x: 0, y: 0 }];
+    const coords =
+      result.COORDINATES && result.COORDINATES.length > 0
+        ? result.COORDINATES
+        : exampleCoords;
+    res.json({ ...result, coordinates: coords });
   } catch (err) {
     res.status(422).json({ error: `Parsing failed: ${err.message}` });
   }
