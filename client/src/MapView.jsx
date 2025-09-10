@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import './MapView.css';
 
 const EPSG3826 =
-  '+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +units=m +no_defs';
+  "+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs"
 proj4.defs('EPSG:3826', EPSG3826);
 
 function MapView({ coordinates = [] }) {
@@ -17,6 +17,7 @@ function MapView({ coordinates = [] }) {
 
     const markers = [];
     coordinates.forEach(([x, y]) => {
+      console.log(x,y);
       const [lon, lat] = proj4('EPSG:3826', 'EPSG:4326', [x, y]);
       markers.push(L.marker([lat, lon]).addTo(map));
     });
