@@ -10,7 +10,7 @@ proj4.defs('EPSG:3826', EPSG3826);
 
 function MapView({ coordinates = [] }) {
   useEffect(() => {
-    const map = L.map('map').setView([0, 0], 13);
+    const map = L.map('map').setView([23, 121], 9);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(map);
