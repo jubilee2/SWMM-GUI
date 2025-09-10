@@ -31,7 +31,6 @@ function MapView({ coordinates = [[173916.0, 2543866.0]] }) {
       } catch (error) {
         console.error('Error projecting coordinates:', error);
       }
-
     });
 
     if (latlngs.length > 0) {
