@@ -28,8 +28,12 @@ function ParseForm({ setCoordinates }) {
       if (!res.ok) throw new Error('Upload failed')
       const json = await res.json()
       setData(json)
-      if (json?.coordinates) {
-        setCoordinates(json.coordinates)
+      if (json?.COORDINATES) {
+        const coordinates = json.COORDINATES.map(([first, ...rest]) => [
+          first,
+          ...rest.map(Number)
+        ]);
+        setCoordinates(coordinates)
       }
     } catch (err) {
       setError(err.message)

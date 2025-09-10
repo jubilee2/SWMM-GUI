@@ -23,9 +23,9 @@ function MapView({ coordinates = [] }) {
 
     layerRef.current.clearLayers()
     const latlngs = []
-    coordinates.forEach((xy) => {
+    coordinates.forEach(([id, x, y]) => {
       try {
-        const [lon, lat] = proj4('EPSG:3826', 'EPSG:4326', xy)
+        const [lon, lat] = proj4('EPSG:3826', 'EPSG:4326', [x, y])
         if (isFinite(lat) && isFinite(lon)) {
           L.marker([lat, lon]).addTo(layerRef.current)
           latlngs.push([lat, lon])
