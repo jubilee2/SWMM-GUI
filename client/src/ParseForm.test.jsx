@@ -5,7 +5,7 @@ import ParseForm from './ParseForm'
 describe('ParseForm', () => {
   it('shows error when coordinates are missing', async () => {
     const setCoordinates = vi.fn()
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({})
     })
@@ -22,7 +22,7 @@ describe('ParseForm', () => {
 
   it('shows error when coordinates are invalid', async () => {
     const setCoordinates = vi.fn()
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ COORDINATES: [['id', 'foo', '0']] })
     })
