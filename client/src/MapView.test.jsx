@@ -1,5 +1,7 @@
 import { render, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+const { latLngBounds } = vi.hoisted(() => ({ latLngBounds: vi.fn() }));
 
 const mapInstance = {
   setView: vi.fn().mockReturnThis(),
@@ -20,6 +22,7 @@ vi.mock('leaflet', () => ({
     tileLayer: vi.fn(() => tileLayerInstance),
     marker: vi.fn(() => markerInstance),
     layerGroup: vi.fn(() => layerGroupInstance),
+    latLngBounds,
   },
 }));
 
@@ -33,6 +36,14 @@ import L from 'leaflet';
 import proj4 from 'proj4';
 
 describe('MapView', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    latLngBounds.mockImplementation(() => ({
+      isValid: () => true,
+      equals: vi.fn(() => false),
+    }));
+  });
+
   it('creates markers for coordinates and cleans up on unmount', async () => {
     const coords = [['foo', 250000, 0]];
     const { container, unmount } = render(<MapView coordinates={coords} />);
@@ -43,5 +54,20 @@ describe('MapView', () => {
     expect(L.marker).toHaveBeenCalledWith([24, 121], {'title': 'foo'});
     unmount();
     expect(mapInstance.remove).toHaveBeenCalled();
+  });
+
+  it('fits bounds when coordinates update', async () => {
+    const invalidBounds = { isValid: () => false, equals: vi.fn() };
+    const validBounds = { isValid: () => true, equals: vi.fn(() => false) };
+    latLngBounds
+      .mockImplementationOnce(() => invalidBounds)
+      .mockImplementationOnce(() => validBounds);
+
+    const { rerender } = render(<MapView coordinates={[]} />);
+    rerender(<MapView coordinates={[['foo', 250000, 0]]} />);
+
+    await waitFor(() =>
+      expect(mapInstance.fitBounds).toHaveBeenCalledWith(validBounds)
+    );
   });
 });
