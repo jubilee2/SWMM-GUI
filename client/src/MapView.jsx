@@ -23,11 +23,11 @@ function MapView({ coordinates = [] }) {
 
     layerRef.current.clearLayers()
     const latlngs = []
-    coordinates.forEach(([id, x, y]) => {
+    coordinates.forEach(([node_id, x, y]) => {
       try {
         const [lon, lat] = proj4('EPSG:3826', 'EPSG:4326', [x, y])
         if (isFinite(lat) && isFinite(lon)) {
-          L.marker([lat, lon]).addTo(layerRef.current)
+          L.marker([lat, lon], {"title": node_id}).addTo(layerRef.current)
           latlngs.push([lat, lon])
         } else {
           console.error('Invalid projected coordinates:', lat, lon)
