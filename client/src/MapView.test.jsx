@@ -40,7 +40,7 @@ describe('MapView', () => {
     await waitFor(() =>
       expect(proj4).toHaveBeenCalledWith('EPSG:3826', 'EPSG:4326', [250000, 0])
     );
-    expect(L.marker).toHaveBeenCalledWith([24, 121]);
+    expect(L.marker).toHaveBeenCalledWith([24, 121], {'title': 'foo'});
     unmount();
     expect(mapInstance.remove).toHaveBeenCalled();
   });
