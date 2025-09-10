@@ -1,12 +1,14 @@
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
 const mapInstance = {
   setView: vi.fn().mockReturnThis(),
+  fitBounds: vi.fn().mockReturnThis(),
   remove: vi.fn(),
 };
 const tileLayerInstance = { addTo: vi.fn() };
-const markerInstance = { addTo: vi.fn().mockReturnThis(), getLatLng: vi.fn(() => ({ lat: 0, lng: 0 })) };
+const markerInstance = { addTo: vi.fn().mockReturnThis() };
+const layerGroupInstance = { addTo: vi.fn().mockReturnThis(), clearLayers: vi.fn() };
 
 vi.mock('leaflet', () => ({
   default: {
@@ -17,6 +19,7 @@ vi.mock('leaflet', () => ({
     }),
     tileLayer: vi.fn(() => tileLayerInstance),
     marker: vi.fn(() => markerInstance),
+    layerGroup: vi.fn(() => layerGroupInstance),
   },
 }));
 
@@ -30,11 +33,13 @@ import L from 'leaflet';
 import proj4 from 'proj4';
 
 describe('MapView', () => {
-  it('creates markers for coordinates and cleans up on unmount', () => {
+  it('creates markers for coordinates and cleans up on unmount', async () => {
     const coords = [[250000, 0]];
     const { container, unmount } = render(<MapView coordinates={coords} />);
     expect(container.querySelector('.leaflet-container')).toBeInTheDocument();
-    expect(proj4).toHaveBeenCalledWith('EPSG:3826', 'EPSG:4326', [250000, 0]);
+    await waitFor(() =>
+      expect(proj4).toHaveBeenCalledWith('EPSG:3826', 'EPSG:4326', [250000, 0])
+    );
     expect(L.marker).toHaveBeenCalledWith([24, 121]);
     unmount();
     expect(mapInstance.remove).toHaveBeenCalled();
