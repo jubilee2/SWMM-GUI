@@ -34,7 +34,7 @@ import proj4 from 'proj4';
 
 describe('MapView', () => {
   it('creates markers for coordinates and cleans up on unmount', async () => {
-    const coords = [[250000, 0]];
+    const coords = [['foo', 250000, 0]];
     const { container, unmount } = render(<MapView coordinates={coords} />);
     expect(container.querySelector('.leaflet-container')).toBeInTheDocument();
     await waitFor(() =>
