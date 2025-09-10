@@ -32,8 +32,22 @@ function ParseForm({ setCoordinates }) {
         const coordinates = json.COORDINATES.map(([first, ...rest]) => [
           first,
           ...rest.map(Number)
-        ]);
-        setCoordinates(coordinates)
+        ])
+        const valid = Array.isArray(coordinates) &&
+          coordinates.every(
+            (arr) => arr.length >= 3 && arr.slice(1).every((n) => isFinite(n))
+          )
+        if (valid) {
+          setCoordinates(coordinates)
+        } else {
+          setCoordinates([])
+          setData(null)
+          setError('Invalid coordinates in file.')
+        }
+      } else {
+        setCoordinates([])
+        setData(null)
+        setError('Coordinates not found in file.')
       }
     } catch (err) {
       setError(err.message)
