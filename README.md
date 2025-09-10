@@ -73,3 +73,36 @@ Run backend unit tests with:
 ```bash
 npm run test:server
 ```
+
+### Uploading INP Files
+
+1. Start both the client and API servers:
+   ```bash
+   npm --prefix client run dev
+   npm start
+   ```
+2. Open the client in your browser (`http://localhost:5173` by default).
+3. In the **Parse INP File** form, choose a `.inp` file and click **Upload**.
+4. When parsing succeeds, markers are added to the map for each entry in the
+   file's `COORDINATES` section. The map automatically pans and zooms to fit
+   the uploaded markers. If no coordinates are found, the map remains at its
+   default view.
+
+![Map before INP upload](docs/map_before.png)
+![Map after INP upload](docs/map_after.png)
+
+*Above: the map before and after uploading an `.inp` file.*
+
+![Map upload demo](docs/map_upload.gif)
+
+#### Limitations & Future Enhancements
+
+* Large `.inp` files may take noticeable time to upload and parse.
+* Only the `COORDINATES` section is currently visualized; other spatial
+  information is ignored.
+
+Planned enhancements include:
+
+* Streaming or chunked parsing for large files.
+* Improved feedback during upload (e.g., progress indicators).
+* Support for additional geometric layers and editing tools.
