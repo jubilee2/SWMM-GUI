@@ -8,7 +8,7 @@ const EPSG3826 =
   "+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs"
 proj4.defs('EPSG:3826', EPSG3826);
 
-function MapView({ coordinates = [[173916.0, 2543866.0]] }) {
+function MapView({ coordinates = [] }) {
   useEffect(() => {
     const map = L.map('map').setView([23, 121], 9);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
