@@ -29,12 +29,6 @@ function App() {
       <button
         className="theme-toggle"
         onClick={toggleTheme}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            toggleTheme()
-          }
-        }}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
         role="switch"
         aria-checked={theme === 'dark'}
