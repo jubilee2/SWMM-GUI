@@ -1,0 +1,24 @@
+{
+  "name": "SWMM-GUI Development",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [3000, 27017],
+  "portsAttributes": {
+    "3000": {
+      "label": "Web"
+    },
+    "27017": {
+      "label": "MongoDB"
+    }
+  },
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "mongodb.mongodb-vscode"
+      ]
+    }
+  }
+}

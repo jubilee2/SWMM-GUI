@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/javascript-node:20
+    command: sleep infinity
+    volumes:
+      - ..:/workspace:cached
+    ports:
+      - 3000:3000
+    networks:
+      - dev
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo:6
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - dev
+networks:
+  dev:
+volumes:
+  mongo-data:
