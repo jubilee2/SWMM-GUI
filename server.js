@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const { parseInp } = require('./server/inpParser');
+const { connectToDatabase } = require('./server/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,9 +52,16 @@ app.use((req, res) => {
 });
 
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  connectToDatabase()
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error('Failed to connect to MongoDB', err);
+      process.exit(1);
+    });
 }
 
 module.exports = app;
