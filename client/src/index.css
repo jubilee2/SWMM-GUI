@@ -62,9 +62,25 @@ button {
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: var(--link-hover);
 }
+
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 2px solid var(--link-hover);
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0.5rem;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus {
+  color: var(--link-hover);
+  outline: 2px solid var(--link-hover);
+  border-radius: 50%;
 }

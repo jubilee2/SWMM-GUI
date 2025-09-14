@@ -26,8 +26,20 @@ function App() {
 
   return (
     <div>
-      <button onClick={toggleTheme}>
-        Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
+      <button
+        className="theme-toggle"
+        onClick={toggleTheme}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            toggleTheme()
+          }
+        }}
+        aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+        role="switch"
+        aria-checked={theme === 'dark'}
+      >
+        {theme === 'light' ? '🌞' : '🌜'}
       </button>
       <h1>SWMM Output</h1>
       <pre className="output">{output}</pre>
