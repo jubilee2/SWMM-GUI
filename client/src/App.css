@@ -9,8 +9,8 @@ h1 {
 }
 
 .output {
-  background-color: #f8f8f8;
-  border: 1px solid #ccc;
+  background-color: var(--output-bg);
+  border: 1px solid var(--output-border);
   padding: 1rem;
   text-align: left;
   white-space: pre-wrap;
