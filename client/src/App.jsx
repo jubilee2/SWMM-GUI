@@ -7,6 +7,11 @@ import ParseForm from './ParseForm'
 function App() {
   const [output, setOutput] = useState('Loading...')
   const [coordinates, setCoordinates] = useState([])
+  const [theme, setTheme] = useState('light')
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
 
   useEffect(() => {
     fetch('/api/output')
@@ -15,8 +20,15 @@ function App() {
       .catch((err) => setOutput(`Error: ${err.message}`))
   }, [])
 
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
+  }
+
   return (
     <div>
+      <button onClick={toggleTheme}>
+        Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
+      </button>
       <h1>SWMM Output</h1>
       <pre className="output">{output}</pre>
       <ParseForm setCoordinates={setCoordinates} />
