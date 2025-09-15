@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const { parseInp } = require('./server/inpParser');
-const { connectToDatabase } = require('./server/db');
+const { connectToDatabase, getDb } = require('./server/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,8 +24,8 @@ app.get('/api/output', (req, res) => {
   });
 });
 
-// Parse uploaded INP file
-app.post('/api/parse', upload.single('file'), (req, res) => {
+// Parse uploaded INP file and persist result
+app.post('/api/parse', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
@@ -39,6 +39,16 @@ app.post('/api/parse', upload.single('file'), (req, res) => {
     fs.unlink(req.file.path, () => {});
     if (!result || Object.keys(result).length === 0) {
       return res.status(422).json({ error: 'Invalid or empty INP file' });
+    }
+    try {
+      const db = getDb();
+      await db.collection('parses').insertOne({
+        filename: req.file.originalname,
+        uploadedAt: new Date(),
+        data: result,
+      });
+    } catch (err) {
+      console.error('Failed to save to database', err);
     }
     res.json(result);
   } catch (err) {

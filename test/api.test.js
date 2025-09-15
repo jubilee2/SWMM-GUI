@@ -3,13 +3,19 @@ import request from 'supertest';
 import { describe, it, expect, vi } from 'vitest';
 
 describe('POST /api/parse', () => {
-  it('parses uploaded INP file', async () => {
+  it('parses uploaded INP file and saves result', async () => {
+    const db = require('../server/db');
+    const insertOne = vi.fn();
+    vi.spyOn(db, 'getDb').mockReturnValue({
+      collection: () => ({ insertOne }),
+    });
     const { default: app } = await import('../server.js');
     const file = path.join(__dirname, 'data', 'sample.inp');
     const res = await request(app).post('/api/parse').attach('file', file);
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('JUNCTIONS');
     expect(res.body.JUNCTIONS[0][0]).toBe('J1');
+    expect(insertOne).toHaveBeenCalled();
   });
 
   it('returns 400 when no file uploaded', async () => {
