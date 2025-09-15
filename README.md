@@ -73,3 +73,17 @@ Run backend unit tests with:
 ```bash
 npm run test:server
 ```
+
+### MongoDB Configuration
+
+The API expects a MongoDB instance. Connection details are controlled via
+environment variables:
+
+- `MONGO_URI` (default `mongodb://localhost:27017`)
+- `MONGO_DB_NAME` (default `swmm`)
+- `MONGO_MAX_POOL_SIZE` (default `100`)
+- `MONGO_MIN_POOL_SIZE` (default `0`)
+
+The MongoDB driver maintains a pooled set of connections. By default it allows
+up to 100 concurrent connections; adjust the variables above if you need a
+different pool size.
