@@ -14,7 +14,7 @@ describe('POST /api/parse', () => {
     const res = await request(app).post('/api/parse').attach('file', file);
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('JUNCTIONS');
-    expect(res.body.JUNCTIONS[0][0]).toBe('J1');
+    expect(res.body.JUNCTIONS[0].id).toBe('J1');
     expect(insertOne).toHaveBeenCalled();
   });
 
