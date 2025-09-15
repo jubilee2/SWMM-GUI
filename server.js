@@ -66,6 +66,9 @@ if (require.main === module) {
     .then(() => {
       app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
+      }).on('error', (err) => {
+        console.error('Failed to start server', err);
+        process.exit(1);
       });
     })
     .catch((err) => {
