@@ -19,10 +19,11 @@ function parseInp(filePath) {
     COORDINATES: (t) => ({ id: t[0], x: parseFloat(t[1]), y: parseFloat(t[2]) }),
     JUNCTIONS: (t) => ({
       id: t[0],
-      elev: parseFloat(t[1]),
-      depth: parseFloat(t[2]),
-      surDepth: parseFloat(t[3]),
-      apond: parseFloat(t[4]),
+      elevation: parseFloat(t[1]),
+      maxDepth: parseFloat(t[2]),
+      initDepth: parseFloat(t[3]),
+      surDepth: parseFloat(t[4]),
+      aponded: parseFloat(t[5]),
     }),
     CONDUITS: (t) => ({
       id: t[0],

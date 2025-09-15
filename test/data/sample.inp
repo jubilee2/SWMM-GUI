@@ -1,7 +1,7 @@
 [JUNCTIONS]
-;ID     Elev  Depth  SurDepth  Apond
-J1      0     0      0         0
-J2      0     0      0         0
+;ID     Elevation  MaxDepth  InitDepth  SurDepth  Aponded
+J1      0          0         0          0         0
+J2      0          0         0          0         0
 
 [CONDUITS]
 ;ID     From   To     Length  Roughness  InOffset  OutOffset  InitFlow  MaxFlow
