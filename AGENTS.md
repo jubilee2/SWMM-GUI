@@ -26,7 +26,7 @@ coordination with the maintainers.
 4. MongoDB is expected to be available locally on the default port.
 
 ## Testing & QA
-- Install dependencies with `npm ci` to mirror the CI workflow.
+- Install dependencies with `npm ci && npm --prefix client ci` to mirror the CI workflow.
 - Backend logic is covered by Vitest suites. Run `npm run test:server` before
   opening a PR.
 - Frontend checks must match the GitHub Action: run `npm --prefix client ci`
