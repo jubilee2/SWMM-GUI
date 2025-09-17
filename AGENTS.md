@@ -21,7 +21,7 @@ coordination with the maintainers.
 1. Install dependencies with `npm install` and `npm --prefix client install` at the repo root.
 2. Use `npm run dev` to start the combined development server once the script is
    introduced. For now, start the pieces manually as noted below.
-3. Frontend-only work can be run with `npm --prefix client start` while
+3. Frontend-only work can be run with `npm --prefix client run dev` while
    backend-only work should use `npm run start` from the repo root.
 4. MongoDB is expected to be available locally on the default port.
 
