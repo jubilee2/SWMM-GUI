@@ -1,8 +1,6 @@
 ORD Stormwater-Management-Model Graphical User Interface
 ==================================
 
-> Temporary note for branch recreation.
-
 Stormwater Management Model (aka "SWMM") GUI only
 
 
