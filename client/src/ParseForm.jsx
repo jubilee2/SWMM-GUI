@@ -1,5 +1,24 @@
 import { useState } from 'react'
 
+const normalizeCoordinates = (coordinates) => {
+  if (!Array.isArray(coordinates)) return null
+
+  const normalized = []
+  for (const coord of coordinates) {
+    if (!coord || typeof coord !== 'object') return null
+    const { id, x, y } = coord
+    if (id === undefined || x === undefined || y === undefined) return null
+
+    const xNum = Number(x)
+    const yNum = Number(y)
+    if (!Number.isFinite(xNum) || !Number.isFinite(yNum)) return null
+
+    normalized.push({ id: String(id), x: xNum, y: yNum })
+  }
+
+  return normalized
+}
+
 function ParseForm({ setCoordinates }) {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
@@ -26,29 +45,18 @@ function ParseForm({ setCoordinates }) {
         body: formData,
       })
       if (!res.ok) throw new Error('Upload failed')
-      const json = await res.json()
-      setData(json)
-      if (json?.COORDINATES) {
-        const coordinates = json.COORDINATES.map(([first, ...rest]) => [
-          first,
-          ...rest.map(Number)
-        ])
-        const valid = Array.isArray(coordinates) &&
-          coordinates.every(
-            (arr) => arr.length >= 3 && arr.slice(1).every((n) => isFinite(n))
-          )
-        if (valid) {
-          setCoordinates(coordinates)
-        } else {
-          setCoordinates([])
-          setData(null)
-          setError('Invalid coordinates in file.')
-        }
-      } else {
+      const result = await res.json()
+      setData(result)
+
+      const normalized = normalizeCoordinates(result.coordinates)
+      if (!normalized) {
         setCoordinates([])
         setData(null)
-        setError('Coordinates not found in file.')
+        setError('Invalid coordinates data received from server.')
+        return
       }
+
+      setCoordinates(normalized)
     } catch (err) {
       setError(err.message)
       setData(null)
