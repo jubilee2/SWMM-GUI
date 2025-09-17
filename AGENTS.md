@@ -49,8 +49,8 @@ coordination with the maintainers.
 ## Review Checklist
 When opening a PR, confirm the following:
 - [ ] Tests succeed locally (`npm run test:server`).
-- [ ] Frontend checks succeed (`npm --prefix client ci`,
-      `npm --prefix client run lint`, `npm --prefix client test`).
+- [ ] Frontend checks succeed (`npm --prefix client run lint`,
+      `npm --prefix client test`).
 - [ ] Updated screenshots are attached for UI changes.
 - [ ] Breaking changes are flagged in the PR description.
 - [ ] Any new environment variables are documented with defaults.
