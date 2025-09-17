@@ -29,8 +29,7 @@ coordination with the maintainers.
 - Install dependencies with `npm ci && npm --prefix client ci` to mirror the CI workflow.
 - Backend logic is covered by Vitest suites. Run `npm run test:server` before
   opening a PR.
-- Frontend checks must match the GitHub Action: run `npm --prefix client ci`
-  (installs dependencies), `npm --prefix client run lint`, and
+- Frontend checks must match the GitHub Action: run `npm --prefix client run lint` and
   `npm --prefix client test`.
 - If you touch Cypress end-to-end specs (future work), run `npm run cypress` and
   capture failures in the PR description.
