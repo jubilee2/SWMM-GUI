@@ -11,8 +11,15 @@ describe('parseInp', () => {
     expect(result).toHaveProperty('JUNCTIONS');
     expect(result).toHaveProperty('CONDUITS');
     expect(result).toHaveProperty('COORDINATES');
-    expect(result.JUNCTIONS[0][0]).toBe('J1');
-    expect(result.CONDUITS[0][1]).toBe('J1');
-    expect(result.COORDINATES.length).toBe(2);
+    expect(result.JUNCTIONS[0]).toEqual({
+      id: 'J1',
+      elevation: 0,
+      maxDepth: 0,
+      initDepth: 0,
+      surDepth: 0,
+      aponded: 0,
+    });
+    expect(result.CONDUITS[0]).toMatchObject({ id: 'C1', from: 'J1', to: 'J2' });
+    expect(result.COORDINATES[0]).toEqual({ id: 'J1', x: 100, y: 100 });
   });
 });
