@@ -7,7 +7,7 @@ describe('ParseForm', () => {
     const setCoordinates = vi.fn()
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ coordinates: [{ id: 'n1', x: 1, y: 2 }] })
+      json: async () => ({ COORDINATES: [{ id: 'n1', x: 1, y: 2 }] })
     })
     const { container } = render(<ParseForm setCoordinates={setCoordinates} />)
     const file = new File(['dummy'], 'test.inp', { type: 'text/plain' })
