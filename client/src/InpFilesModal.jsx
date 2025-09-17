@@ -60,10 +60,16 @@ function InpFilesModal({ onClose }) {
         method: 'DELETE',
       })
       if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('The selected INP file was not found.')
+        let errorMessage = 'Failed to delete the selected INP file.';
+        try {
+          const errorBody = await response.json();
+          if (errorBody.error) {
+            errorMessage = errorBody.error;
+          }
+        } catch (e) {
+          console.debug('Error parsing error response:', e); // Optional logging
         }
-        throw new Error('Failed to delete the selected INP file.')
+        throw new Error(errorMessage);
       }
       setFiles((prev) => prev.filter((file) => file._id !== id))
     } catch (err) {
