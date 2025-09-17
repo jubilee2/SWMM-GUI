@@ -24,11 +24,11 @@ function MapView({ coordinates = [] }) {
 
     layerRef.current.clearLayers()
     const latlngs = []
-    coordinates.forEach(([node_id, x, y]) => {
+    coordinates.forEach(({ id, x, y }) => {
       try {
         const [lon, lat] = proj4('EPSG:3826', 'EPSG:4326', [x, y])
         if (isFinite(lat) && isFinite(lon)) {
-          L.marker([lat, lon], { title: node_id }).addTo(layerRef.current)
+          L.marker([lat, lon], { title: id }).addTo(layerRef.current)
           latlngs.push([lat, lon])
         } else {
           console.error('Invalid projected coordinates:', lat, lon)
@@ -40,13 +40,11 @@ function MapView({ coordinates = [] }) {
 
     const newBounds = L.latLngBounds(latlngs)
     if (newBounds.isValid()) {
-      if (!boundsRef.current || !boundsRef.current.equals(newBounds)) {
-        try {
-          mapRef.current.fitBounds(newBounds)
-          boundsRef.current = newBounds
-        } catch (error) {
-          console.error('Error fitting bounds:', error)
-        }
+      try {
+        mapRef.current.fitBounds(newBounds)
+        boundsRef.current = newBounds
+      } catch (error) {
+        console.error('Error fitting bounds:', error)
       }
     } else {
       boundsRef.current = null
