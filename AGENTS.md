@@ -18,7 +18,7 @@ retained strictly for reference and should not be modified without prior
 coordination with the maintainers.
 
 ## Local Development
-1. Install dependencies with `npm install` at the repo root.
+1. Install dependencies with `npm install` and `npm --prefix client install` at the repo root.
 2. Use `npm run dev` to start the combined development server once the script is
    introduced. For now, start the pieces manually as noted below.
 3. Frontend-only work can be run with `npm --prefix client start` while
