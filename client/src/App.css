@@ -92,6 +92,27 @@ h1 {
   background-color: var(--table-header-bg);
 }
 
+.modal-table .actions-header,
+.modal-table .actions-cell {
+  text-align: right;
+  white-space: nowrap;
+  width: 1%;
+}
+
+.modal-action {
+  background: none;
+  border: 1px solid var(--output-border);
+  border-radius: 4px;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  color: inherit;
+}
+
+.modal-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .error-banner {
   margin: 1rem 0;
   padding: 0.75rem 1rem;

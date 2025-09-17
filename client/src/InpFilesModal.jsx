@@ -11,6 +11,7 @@ function InpFilesModal({ onClose }) {
   const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
 
   useEffect(() => {
     let isMounted = true
@@ -51,6 +52,27 @@ function InpFilesModal({ onClose }) {
     }
   }, [])
 
+  const handleDelete = async (id) => {
+    setError(null)
+    setDeletingId(id)
+    try {
+      const response = await fetch(`/api/inp-files/${id}`, {
+        method: 'DELETE',
+      })
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('The selected INP file was not found.')
+        }
+        throw new Error('Failed to delete the selected INP file.')
+      }
+      setFiles((prev) => prev.filter((file) => file._id !== id))
+    } catch (err) {
+      setError(err.message || 'Failed to delete the selected INP file.')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="inp-files-title">
       <div className="modal">
@@ -71,6 +93,9 @@ function InpFilesModal({ onClose }) {
                 <tr>
                   <th scope="col">File Name</th>
                   <th scope="col">Uploaded</th>
+                  <th scope="col" className="actions-header">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -78,6 +103,17 @@ function InpFilesModal({ onClose }) {
                   <tr key={file._id}>
                     <td>{file.filename || 'Unnamed file'}</td>
                     <td>{formatDate(file.uploadedAt)}</td>
+                    <td className="actions-cell">
+                      <button
+                        type="button"
+                        className="modal-action"
+                        onClick={() => handleDelete(file._id)}
+                        disabled={deletingId === file._id}
+                        aria-label={`Delete ${file.filename || 'stored INP file'}`}
+                      >
+                        {deletingId === file._id ? 'Deleting…' : 'Delete'}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
