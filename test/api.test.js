@@ -97,3 +97,57 @@ describe('GET /api/inp-files', () => {
     expect(res.body.error).toBe('Failed to fetch INP files');
   });
 });
+
+describe('DELETE /api/inp-files/:id', () => {
+  it('returns 400 for an invalid id', async () => {
+    vi.resetModules();
+    const { default: app } = await import('../server.js');
+    const res = await request(app).delete('/api/inp-files/not-an-id');
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Invalid INP file id');
+  });
+
+  it('returns 404 when no document is removed', async () => {
+    const db = require('../server/db');
+    vi.spyOn(db, 'getDb').mockReturnValue({
+      collection: () => ({
+        deleteOne: () => Promise.resolve({ deletedCount: 0 }),
+      }),
+    });
+    vi.resetModules();
+    const { default: app } = await import('../server.js');
+    const res = await request(app).delete('/api/inp-files/507f1f77bcf86cd799439011');
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('INP file not found');
+  });
+
+  it('returns 204 when deletion succeeds', async () => {
+    const deleteOne = vi.fn().mockResolvedValue({ deletedCount: 1 });
+    const db = require('../server/db');
+    vi.spyOn(db, 'getDb').mockReturnValue({
+      collection: () => ({ deleteOne }),
+    });
+    vi.resetModules();
+    const { default: app } = await import('../server.js');
+    const res = await request(app).delete('/api/inp-files/507f1f77bcf86cd799439011');
+    expect(res.status).toBe(204);
+    expect(deleteOne).toHaveBeenCalledTimes(1);
+    expect(deleteOne).toHaveBeenCalledWith({ _id: expect.any(Object) });
+  });
+
+  it('returns 500 when deletion throws', async () => {
+    const db = require('../server/db');
+    vi.spyOn(db, 'getDb').mockReturnValue({
+      collection: () => ({
+        deleteOne: () => {
+          throw new Error('boom');
+        },
+      }),
+    });
+    vi.resetModules();
+    const { default: app } = await import('../server.js');
+    const res = await request(app).delete('/api/inp-files/507f1f77bcf86cd799439011');
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('Failed to delete INP file');
+  });
+});
