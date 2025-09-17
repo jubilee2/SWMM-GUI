@@ -1,5 +1,24 @@
 import { useState } from 'react'
 
+const normalizeCoordinates = (coordinates) => {
+  if (!Array.isArray(coordinates)) return null
+
+  const normalized = []
+  for (const coord of coordinates) {
+    if (!coord || typeof coord !== 'object' || Array.isArray(coord)) return null
+    const { id, x, y } = coord
+    if (id === undefined || x === undefined || y === undefined) return null
+
+    const xNum = Number(x)
+    const yNum = Number(y)
+    if (!Number.isFinite(xNum) || !Number.isFinite(yNum)) return null
+
+    normalized.push({ id: String(id), x: xNum, y: yNum })
+  }
+
+  return normalized
+}
+
 function ParseForm({ setCoordinates }) {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
@@ -28,7 +47,16 @@ function ParseForm({ setCoordinates }) {
       if (!res.ok) throw new Error('Upload failed')
       const result = await res.json()
       setData(result)
-      setCoordinates(Array.isArray(result.COORDINATES) ? result.COORDINATES : [])
+
+      const normalized = normalizeCoordinates(result.COORDINATES)
+      if (!normalized) {
+        setCoordinates([])
+        setData(null)
+        setError('Invalid coordinates data received from server.')
+        return
+      }
+
+      setCoordinates(normalized)
     } catch (err) {
       setError(err.message)
       setData(null)

@@ -40,11 +40,13 @@ function MapView({ coordinates = [] }) {
 
     const newBounds = L.latLngBounds(latlngs)
     if (newBounds.isValid()) {
-      try {
-        mapRef.current.fitBounds(newBounds)
-        boundsRef.current = newBounds
-      } catch (error) {
-        console.error('Error fitting bounds:', error)
+      if (!boundsRef.current || !boundsRef.current.equals(newBounds)) {
+        try {
+          mapRef.current.fitBounds(newBounds)
+          boundsRef.current = newBounds
+        } catch (error) {
+          console.error('Error fitting bounds:', error)
+        }
       }
     } else {
       boundsRef.current = null

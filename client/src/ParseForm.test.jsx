@@ -19,7 +19,7 @@ describe('ParseForm', () => {
     )
   })
 
-  it('handles missing coordinates field', async () => {
+  it('shows an error when coordinates are missing or invalid', async () => {
     const setCoordinates = vi.fn()
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -31,5 +31,10 @@ describe('ParseForm', () => {
     fireEvent.change(input, { target: { files: [file] } })
     fireEvent.submit(container.querySelector('form'))
     await waitFor(() => expect(setCoordinates).toHaveBeenCalledWith([]))
+    await waitFor(() =>
+      expect(
+        container.querySelector('.error-banner')?.textContent
+      ).toContain('Invalid coordinates data received from server.')
+    )
   })
 })
