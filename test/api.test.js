@@ -78,6 +78,7 @@ describe('GET /api/inp-files', () => {
         }),
       }),
     });
+    vi.resetModules();
     const { default: app } = await import('../server.js');
     const res = await request(app).get('/api/inp-files');
     expect(res.status).toBe(200);
