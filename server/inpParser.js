@@ -15,6 +15,29 @@ function parseInp(filePath) {
   const sections = {};
   let currentSection = null;
 
+  const converters = {
+    COORDINATES: (t) => ({ id: t[0], x: parseFloat(t[1]), y: parseFloat(t[2]) }),
+    JUNCTIONS: (t) => ({
+      id: t[0],
+      elevation: parseFloat(t[1]),
+      maxDepth: parseFloat(t[2]),
+      initDepth: parseFloat(t[3]),
+      surDepth: parseFloat(t[4]),
+      aponded: parseFloat(t[5]),
+    }),
+    CONDUITS: (t) => ({
+      id: t[0],
+      from: t[1],
+      to: t[2],
+      length: parseFloat(t[3]),
+      roughness: parseFloat(t[4]),
+      inOffset: parseFloat(t[5]),
+      outOffset: parseFloat(t[6]),
+      initFlow: parseFloat(t[7]),
+      maxFlow: parseFloat(t[8]),
+    }),
+  };
+
   for (const rawLine of lines) {
     const line = trimComments(rawLine);
     if (!line) continue;
@@ -27,7 +50,9 @@ function parseInp(filePath) {
       continue;
     }
     if (currentSection) {
-      sections[currentSection].push(tokenize(line));
+      const tokens = tokenize(line);
+      const convert = converters[currentSection];
+      sections[currentSection].push(convert ? convert(tokens) : tokens);
     }
   }
 
