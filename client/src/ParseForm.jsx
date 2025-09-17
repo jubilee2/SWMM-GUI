@@ -5,7 +5,7 @@ const normalizeCoordinates = (coordinates) => {
 
   const normalized = []
   for (const coord of coordinates) {
-    if (!coord || typeof coord !== 'object') return null
+    if (!coord || typeof coord !== 'object' || Array.isArray(coord)) return null
     const { id, x, y } = coord
     if (id === undefined || x === undefined || y === undefined) return null
 
