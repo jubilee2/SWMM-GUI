@@ -48,7 +48,7 @@ function ParseForm({ setCoordinates }) {
       const result = await res.json()
       setData(result)
 
-      const normalized = normalizeCoordinates(result.coordinates)
+      const normalized = normalizeCoordinates(result.COORDINATES)
       if (!normalized) {
         setCoordinates([])
         setData(null)

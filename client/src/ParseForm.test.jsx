@@ -3,11 +3,11 @@ import { describe, it, expect, vi } from 'vitest'
 import ParseForm from './ParseForm'
 
 describe('ParseForm', () => {
-  it('passes valid coordinates from parser to setCoordinates', async () => {
+  it('passes coordinates from parser to setCoordinates', async () => {
     const setCoordinates = vi.fn()
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ coordinates: [{ id: 'n1', x: '1', y: 2 }] })
+      json: async () => ({ COORDINATES: [{ id: 'n1', x: 1, y: 2 }] })
     })
     const { container } = render(<ParseForm setCoordinates={setCoordinates} />)
     const file = new File(['dummy'], 'test.inp', { type: 'text/plain' })
