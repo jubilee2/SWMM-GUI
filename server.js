@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const { ObjectId } = require('mongodb');
 const { parseInp } = require('./server/inpParser');
 const { connectToDatabase, getDb } = require('./server/db');
 
@@ -68,6 +69,25 @@ app.get('/api/inp-files', async (req, res) => {
   } catch (err) {
     console.error('Failed to fetch INP files', err);
     res.status(500).json({ error: 'Failed to fetch INP files' });
+  }
+});
+
+app.delete('/api/inp-files/:id', async (req, res) => {
+  const { id } = req.params;
+  if (!ObjectId.isValid(id)) {
+    return res.status(400).json({ error: 'Invalid INP file id' });
+  }
+
+  try {
+    const db = getDb();
+    const result = await db.collection('parses').deleteOne({ _id: new ObjectId(id) });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'INP file not found' });
+    }
+    return res.status(204).send();
+  } catch (err) {
+    console.error('Failed to delete INP file', err);
+    return res.status(500).json({ error: 'Failed to delete INP file' });
   }
 });
 
