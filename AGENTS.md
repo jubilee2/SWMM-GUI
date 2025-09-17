@@ -18,7 +18,7 @@ retained strictly for reference and should not be modified without prior
 coordination with the maintainers.
 
 ## Local Development
-1. Install dependencies with `npm install` at the repo root.
+1. Install dependencies with `npm install` and `npm --prefix client install` at the repo root.
 2. Use `npm run dev` to start the combined development server once the script is
    introduced. For now, start the pieces manually as noted below.
 3. Frontend-only work can be run with `npm --prefix client run dev` while
@@ -29,7 +29,7 @@ coordination with the maintainers.
 - Install dependencies with `npm ci && npm --prefix client ci` to mirror the CI workflow.
 - Backend logic is covered by Vitest suites. Run `npm run test:server` before
   opening a PR.
-- Frontend checks must match the GitHub Action: run `npm --prefix client run lint` and
+- Frontend checks run `npm --prefix client run lint` and
   `npm --prefix client test`.
 - If you touch Cypress end-to-end specs (future work), run `npm run cypress` and
   capture failures in the PR description.
