@@ -1,6 +1,10 @@
 import path from 'path';
 import request from 'supertest';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe('POST /api/parse', () => {
   it('parses uploaded INP file and saves result', async () => {
@@ -55,5 +59,39 @@ describe('POST /api/parse', () => {
     expect(res.status).toBe(422);
     expect(res.body.error).toBe('Parsing failed: boom');
     spy.mockRestore();
+  });
+});
+
+describe('GET /api/inp-files', () => {
+  it('returns stored INP file metadata', async () => {
+    const records = [
+      { _id: '1', filename: 'first.inp', uploadedAt: '2024-01-01T00:00:00.000Z' },
+      { _id: '2', filename: 'second.inp', uploadedAt: '2024-02-01T00:00:00.000Z' },
+    ];
+    const db = require('../server/db');
+    vi.spyOn(db, 'getDb').mockReturnValue({
+      collection: () => ({
+        find: () => ({
+          sort: () => ({
+            toArray: () => Promise.resolve(records),
+          }),
+        }),
+      }),
+    });
+    const { default: app } = await import('../server.js');
+    const res = await request(app).get('/api/inp-files');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(records);
+  });
+
+  it('returns 500 when database access fails', async () => {
+    const db = require('../server/db');
+    vi.spyOn(db, 'getDb').mockImplementation(() => {
+      throw new Error('no db');
+    });
+    const { default: app } = await import('../server.js');
+    const res = await request(app).get('/api/inp-files');
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('Failed to fetch INP files');
   });
 });

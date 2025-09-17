@@ -3,11 +3,13 @@ import './App.css'
 import MapView from './MapView'
 import ResultsView from './ResultsView'
 import ParseForm from './ParseForm'
+import InpFilesModal from './InpFilesModal'
 
 function App() {
   const [output, setOutput] = useState('Loading...')
   const [coordinates, setCoordinates] = useState([])
   const [theme, setTheme] = useState('light')
+  const [showInpFilesModal, setShowInpFilesModal] = useState(false)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -35,11 +37,21 @@ function App() {
       >
         {theme === 'light' ? '🌞' : '🌜'}
       </button>
+      <button
+        className="inp-files-button"
+        type="button"
+        onClick={() => setShowInpFilesModal(true)}
+      >
+        View Stored INP Files
+      </button>
       <h1>SWMM Output</h1>
       <pre className="output">{output}</pre>
       <ParseForm setCoordinates={setCoordinates} />
       <MapView coordinates={coordinates} />
       <ResultsView />
+      {showInpFilesModal && (
+        <InpFilesModal onClose={() => setShowInpFilesModal(false)} />
+      )}
     </div>
   )
 }
