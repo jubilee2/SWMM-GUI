@@ -61,10 +61,11 @@ function InpFilesModal({ onClose }) {
           </button>
         </div>
         <div className="modal-body">
-          {loading && <p>Loading INP files...</p>}
-          {error && <div className="error-banner">{error}</div>}
-          {!loading && !error && files.length === 0 && <p>No INP files have been stored yet.</p>}
-          {!loading && !error && files.length > 0 && (
+          {loading ? (
+            <p>Loading INP files...</p>
+          ) : error ? (
+            <div className="error-banner">{error}</div>
+          ) : files.length > 0 ? (
             <table className="modal-table">
               <thead>
                 <tr>
@@ -74,13 +75,15 @@ function InpFilesModal({ onClose }) {
               </thead>
               <tbody>
                 {files.map((file) => (
-                  <tr key={file._id || `${file.filename}-${file.uploadedAt}`}>
+                  <tr key={file._id}>
                     <td>{file.filename || 'Unnamed file'}</td>
                     <td>{formatDate(file.uploadedAt)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          ) : (
+            <p>No INP files have been stored yet.</p>
           )}
         </div>
       </div>
