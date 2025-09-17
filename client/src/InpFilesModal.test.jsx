@@ -12,21 +12,21 @@ function createDeferred() {
 
 describe('InpFilesModal', () => {
   const onClose = vi.fn()
-  const originalFetch = global.fetch
+  const originalFetch = globalThis.fetch
 
   beforeEach(() => {
-    global.fetch = vi.fn()
+    globalThis.fetch = vi.fn()
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
-    global.fetch = originalFetch
+    globalThis.fetch = originalFetch
   })
 
   it('deletes a file when the delete button is clicked', async () => {
     const deleteDeferred = createDeferred()
 
-    global.fetch
+    globalThis.fetch
       .mockResolvedValueOnce({
         ok: true,
         json: async () => [
@@ -46,7 +46,7 @@ describe('InpFilesModal', () => {
     fireEvent.click(deleteButton)
 
     expect(deleteButton).toBeDisabled()
-    expect(global.fetch).toHaveBeenNthCalledWith(2, '/api/inp-files/abc123', {
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(2, '/api/inp-files/abc123', {
       method: 'DELETE',
     })
 
