@@ -56,6 +56,21 @@ app.post('/api/parse', upload.single('file'), async (req, res) => {
   }
 });
 
+app.get('/api/inp-files', async (req, res) => {
+  try {
+    const db = getDb();
+    const files = await db
+      .collection('parses')
+      .find({}, { projection: { filename: 1, uploadedAt: 1 } })
+      .sort({ uploadedAt: -1 })
+      .toArray();
+    res.json(files);
+  } catch (err) {
+    console.error('Failed to fetch INP files', err);
+    res.status(500).json({ error: 'Failed to fetch INP files' });
+  }
+});
+
 // Fallback to index.html for SPA routing
 app.use((req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));

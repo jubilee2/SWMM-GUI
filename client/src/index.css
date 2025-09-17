@@ -11,6 +11,12 @@
   --button-bg: #f9f9f9;
   --output-bg: #f8f8f8;
   --output-border: #ccc;
+  --modal-bg: #ffffff;
+  --backdrop-bg: rgba(0, 0, 0, 0.45);
+  --table-header-bg: #f0f0f0;
+  --error-bg: rgba(211, 47, 47, 0.15);
+  --error-border: rgba(211, 47, 47, 0.4);
+  --error-text: #8b0000;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -26,6 +32,12 @@
   --button-bg: #1a1a1a;
   --output-bg: #1a1a1a;
   --output-border: #555;
+  --modal-bg: #1f1f1f;
+  --backdrop-bg: rgba(0, 0, 0, 0.6);
+  --table-header-bg: #2a2a2a;
+  --error-bg: rgba(244, 67, 54, 0.2);
+  --error-border: rgba(244, 67, 54, 0.4);
+  --error-text: #ffb4b4;
 }
 
 a {
