@@ -26,29 +26,9 @@ function ParseForm({ setCoordinates }) {
         body: formData,
       })
       if (!res.ok) throw new Error('Upload failed')
-      const json = await res.json()
-      setData(json)
-      if (json?.COORDINATES) {
-        const coordinates = json.COORDINATES.map(([first, ...rest]) => [
-          first,
-          ...rest.map(Number)
-        ])
-        const valid = Array.isArray(coordinates) &&
-          coordinates.every(
-            (arr) => arr.length >= 3 && arr.slice(1).every((n) => isFinite(n))
-          )
-        if (valid) {
-          setCoordinates(coordinates)
-        } else {
-          setCoordinates([])
-          setData(null)
-          setError('Invalid coordinates in file.')
-        }
-      } else {
-        setCoordinates([])
-        setData(null)
-        setError('Coordinates not found in file.')
-      }
+      const result = await res.json()
+      setData(result)
+      setCoordinates(Array.isArray(result.coordinates) ? result.coordinates : [])
     } catch (err) {
       setError(err.message)
       setData(null)
