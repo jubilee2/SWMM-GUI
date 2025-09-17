@@ -89,6 +89,7 @@ describe('GET /api/inp-files', () => {
     vi.spyOn(db, 'getDb').mockImplementation(() => {
       throw new Error('no db');
     });
+    vi.resetModules();
     const { default: app } = await import('../server.js');
     const res = await request(app).get('/api/inp-files');
     expect(res.status).toBe(500);
