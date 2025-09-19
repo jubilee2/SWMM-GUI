@@ -86,7 +86,12 @@ function ParseForm({ setCoordinates }) {
           name="title"
           type="text"
           value={title}
-          onChange={(event) => setTitle(event.target.value)}
+          onChange={(event) => {
+            setTitle(event.target.value)
+            if (error === 'Title is required.') {
+              setError(null)
+            }
+          }}
           required
         />
         <input type="file" name="file" accept=".inp" />
