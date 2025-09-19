@@ -35,6 +35,11 @@ app.post('/api/parse', upload.single('file'), async (req, res) => {
     fs.unlink(req.file.path, () => {});
     return res.status(400).json({ error: 'Unsupported file type' });
   }
+  const title = typeof req.body?.title === 'string' ? req.body.title.trim() : '';
+  if (!title) {
+    fs.unlink(req.file.path, () => {});
+    return res.status(400).json({ error: 'Title is required' });
+  }
   try {
     const result = parseInp(req.file.path);
     fs.unlink(req.file.path, () => {});
@@ -45,6 +50,7 @@ app.post('/api/parse', upload.single('file'), async (req, res) => {
       const db = getDb();
       await db.collection('parses').insertOne({
         filename: req.file.originalname,
+        title,
         uploadedAt: new Date(),
         data: result,
       });
@@ -62,7 +68,7 @@ app.get('/api/inp-files', async (req, res) => {
     const db = getDb();
     const files = await db
       .collection('parses')
-      .find({}, { projection: { filename: 1, uploadedAt: 1 } })
+      .find({}, { projection: { filename: 1, title: 1, uploadedAt: 1 } })
       .sort({ uploadedAt: -1 })
       .toArray();
     res.json(files);

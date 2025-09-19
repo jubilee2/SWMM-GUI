@@ -15,11 +15,19 @@ describe('POST /api/parse', () => {
     });
     const { default: app } = await import('../server.js');
     const file = path.join(__dirname, 'data', 'sample.inp');
-    const res = await request(app).post('/api/parse').attach('file', file);
+    const res = await request(app)
+      .post('/api/parse')
+      .field('title', 'Sample Model')
+      .attach('file', file);
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('JUNCTIONS');
     expect(res.body.JUNCTIONS[0]).toMatchObject({ id: 'J1', elevation: 0 });
-    expect(insertOne).toHaveBeenCalled();
+    expect(insertOne).toHaveBeenCalledWith({
+      filename: 'sample.inp',
+      title: 'Sample Model',
+      uploadedAt: expect.any(Date),
+      data: expect.any(Object),
+    });
   });
 
   it('returns 400 when no file uploaded', async () => {
@@ -32,7 +40,10 @@ describe('POST /api/parse', () => {
   it('returns 422 for invalid INP file', async () => {
     const { default: app } = await import('../server.js');
     const file = path.join(__dirname, 'data', 'invalid.inp');
-    const res = await request(app).post('/api/parse').attach('file', file);
+    const res = await request(app)
+      .post('/api/parse')
+      .field('title', 'Invalid Model')
+      .attach('file', file);
     expect(res.status).toBe(422);
     expect(res.body.error).toMatch(/invalid or empty/i);
   });
@@ -40,7 +51,10 @@ describe('POST /api/parse', () => {
   it('returns 400 for unsupported file type', async () => {
     const { default: app } = await import('../server.js');
     const file = path.join(__dirname, 'data', 'sample.txt');
-    const res = await request(app).post('/api/parse').attach('file', file);
+    const res = await request(app)
+      .post('/api/parse')
+      .field('title', 'Text upload')
+      .attach('file', file);
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('Unsupported file type');
   });
@@ -55,18 +69,39 @@ describe('POST /api/parse', () => {
       });
     const app = require('../server.js');
     const file = path.join(__dirname, 'data', 'sample.inp');
-    const res = await request(app).post('/api/parse').attach('file', file);
+    const res = await request(app)
+      .post('/api/parse')
+      .field('title', 'Explosive upload')
+      .attach('file', file);
     expect(res.status).toBe(422);
     expect(res.body.error).toBe('Parsing failed: boom');
     spy.mockRestore();
+  });
+
+  it('returns 400 when title is missing', async () => {
+    const { default: app } = await import('../server.js');
+    const file = path.join(__dirname, 'data', 'sample.inp');
+    const res = await request(app).post('/api/parse').attach('file', file);
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Title is required');
   });
 });
 
 describe('GET /api/inp-files', () => {
   it('returns stored INP file metadata', async () => {
     const records = [
-      { _id: '1', filename: 'first.inp', uploadedAt: '2024-01-01T00:00:00.000Z' },
-      { _id: '2', filename: 'second.inp', uploadedAt: '2024-02-01T00:00:00.000Z' },
+      {
+        _id: '1',
+        filename: 'first.inp',
+        title: 'First model',
+        uploadedAt: '2024-01-01T00:00:00.000Z',
+      },
+      {
+        _id: '2',
+        filename: 'second.inp',
+        title: 'Second model',
+        uploadedAt: '2024-02-01T00:00:00.000Z',
+      },
     ];
     const db = require('../server/db');
     vi.spyOn(db, 'getDb').mockReturnValue({

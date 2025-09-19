@@ -20,6 +20,7 @@ const normalizeCoordinates = (coordinates) => {
 }
 
 function ParseForm({ setCoordinates }) {
+  const [title, setTitle] = useState('')
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -29,6 +30,13 @@ function ParseForm({ setCoordinates }) {
     const file = e.target.elements.file.files[0]
     if (!file) return
 
+    const trimmedTitle = title.trim()
+    if (!trimmedTitle) {
+      setError('Title is required.')
+      setData(null)
+      return
+    }
+
     if (!file.name.toLowerCase().endsWith('.inp')) {
       setError('Invalid file type. Please upload a .inp file.')
       setData(null)
@@ -37,6 +45,7 @@ function ParseForm({ setCoordinates }) {
 
     const formData = new FormData()
     formData.append('file', file)
+    formData.append('title', trimmedTitle)
     setLoading(true)
     setError(null)
     try {
@@ -47,6 +56,8 @@ function ParseForm({ setCoordinates }) {
       if (!res.ok) throw new Error('Upload failed')
       const result = await res.json()
       setData(result)
+
+      setTitle('')
 
       const normalized = normalizeCoordinates(result.COORDINATES)
       if (!normalized) {
@@ -69,6 +80,15 @@ function ParseForm({ setCoordinates }) {
     <div>
       <h2>Parse INP File</h2>
       <form onSubmit={handleSubmit}>
+        <label htmlFor="title">Title</label>
+        <input
+          id="title"
+          name="title"
+          type="text"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          required
+        />
         <input type="file" name="file" accept=".inp" />
         <button type="submit">Upload</button>
       </form>
