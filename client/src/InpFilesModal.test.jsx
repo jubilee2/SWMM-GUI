@@ -33,6 +33,7 @@ describe('InpFilesModal', () => {
           {
             _id: 'abc123',
             filename: 'Example.inp',
+            title: 'Example model',
             uploadedAt: '2024-01-01T00:00:00.000Z',
           },
         ],
@@ -41,6 +42,7 @@ describe('InpFilesModal', () => {
 
     render(<InpFilesModal onClose={onClose} />)
 
+    expect(await screen.findByText('Example model')).toBeInTheDocument()
     const deleteButton = await screen.findByRole('button', { name: 'Delete Example.inp' })
 
     fireEvent.click(deleteButton)

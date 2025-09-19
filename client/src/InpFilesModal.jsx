@@ -97,6 +97,7 @@ function InpFilesModal({ onClose }) {
             <table className="modal-table">
               <thead>
                 <tr>
+                  <th scope="col">Title</th>
                   <th scope="col">File Name</th>
                   <th scope="col">Uploaded</th>
                   <th scope="col" className="actions-header">
@@ -107,6 +108,7 @@ function InpFilesModal({ onClose }) {
               <tbody>
                 {files.map((file) => (
                   <tr key={file._id}>
+                    <td>{file.title || 'Untitled'}</td>
                     <td>{file.filename || 'Unnamed file'}</td>
                     <td>{formatDate(file.uploadedAt)}</td>
                     <td className="actions-cell">

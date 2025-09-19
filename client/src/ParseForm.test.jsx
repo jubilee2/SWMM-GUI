@@ -11,12 +11,16 @@ describe('ParseForm', () => {
     })
     const { container } = render(<ParseForm setCoordinates={setCoordinates} />)
     const file = new File(['dummy'], 'test.inp', { type: 'text/plain' })
+    const titleInput = container.querySelector('input[name="title"]')
+    fireEvent.change(titleInput, { target: { value: 'Test upload' } })
     const input = container.querySelector('input[type="file"]')
     fireEvent.change(input, { target: { files: [file] } })
     fireEvent.submit(container.querySelector('form'))
     await waitFor(() =>
       expect(setCoordinates).toHaveBeenCalledWith([{ id: 'n1', x: 1, y: 2 }])
     )
+    const formData = globalThis.fetch.mock.calls[0][1].body
+    expect(formData.get('title')).toBe('Test upload')
   })
 
   it('shows an error when coordinates are missing or invalid', async () => {
@@ -27,6 +31,8 @@ describe('ParseForm', () => {
     })
     const { container } = render(<ParseForm setCoordinates={setCoordinates} />)
     const file = new File(['dummy'], 'test.inp', { type: 'text/plain' })
+    const titleInput = container.querySelector('input[name="title"]')
+    fireEvent.change(titleInput, { target: { value: 'Another upload' } })
     const input = container.querySelector('input[type="file"]')
     fireEvent.change(input, { target: { files: [file] } })
     fireEvent.submit(container.querySelector('form'))
@@ -35,6 +41,20 @@ describe('ParseForm', () => {
       expect(
         container.querySelector('.error-banner')?.textContent
       ).toContain('Invalid coordinates data received from server.')
+    )
+  })
+
+  it('prevents submission without a title', async () => {
+    const setCoordinates = vi.fn()
+    globalThis.fetch = vi.fn()
+    const { container } = render(<ParseForm setCoordinates={setCoordinates} />)
+    const file = new File(['dummy'], 'test.inp', { type: 'text/plain' })
+    const input = container.querySelector('input[type="file"]')
+    fireEvent.change(input, { target: { files: [file] } })
+    fireEvent.submit(container.querySelector('form'))
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+    expect(container.querySelector('.error-banner')?.textContent).toContain(
+      'Title is required.'
     )
   })
 })
