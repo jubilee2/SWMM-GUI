@@ -68,7 +68,7 @@ app.get('/api/inp-files', async (req, res) => {
     const db = getDb();
     const files = await db
       .collection('parses')
-      .find({}, { projection: { filename: 1, title: 1, uploadedAt: 1 } })
+      .find({}, { projection: {  title: 1, filename: 1,uploadedAt: 1 } })
       .sort({ uploadedAt: -1 })
       .toArray();
     res.json(files);
