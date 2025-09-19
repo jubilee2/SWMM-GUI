@@ -27,6 +27,7 @@ function ParseForm({ setCoordinates }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     const file = e.target.elements.file.files[0]
+    const title = e.target.elements.title.value
     if (!file) return
 
     if (!file.name.toLowerCase().endsWith('.inp')) {
@@ -37,6 +38,7 @@ function ParseForm({ setCoordinates }) {
 
     const formData = new FormData()
     formData.append('file', file)
+    formData.append('title', title)
     setLoading(true)
     setError(null)
     try {
@@ -70,6 +72,7 @@ function ParseForm({ setCoordinates }) {
       <h2>Parse INP File</h2>
       <form onSubmit={handleSubmit}>
         <input type="file" name="file" accept=".inp" />
+        <input type="text" name="title" placeholder="Title" />
         <button type="submit">Upload</button>
       </form>
       {loading && <p>Parsing...</p>}

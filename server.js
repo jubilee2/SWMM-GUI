@@ -44,6 +44,7 @@ app.post('/api/parse', upload.single('file'), async (req, res) => {
     try {
       const db = getDb();
       await db.collection('parses').insertOne({
+        title: req.body.title || 'Untitled',
         filename: req.file.originalname,
         uploadedAt: new Date(),
         data: result,
@@ -62,7 +63,7 @@ app.get('/api/inp-files', async (req, res) => {
     const db = getDb();
     const files = await db
       .collection('parses')
-      .find({}, { projection: { filename: 1, uploadedAt: 1 } })
+      .find({}, { projection: { title: 1, filename: 1, uploadedAt: 1 } })
       .sort({ uploadedAt: -1 })
       .toArray();
     res.json(files);
