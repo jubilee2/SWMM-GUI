@@ -51,10 +51,7 @@ function App() {
       throw new Error('Loaded INP file is missing valid coordinate data.')
     }
 
-    setCoordinates([])
-    setTimeout(() => {
-      setCoordinates(normalized)
-    }, 0)
+    setCoordinates(normalized)
   }, [setCoordinates])
 
   return (
