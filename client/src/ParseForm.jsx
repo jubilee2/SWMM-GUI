@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const normalizeCoordinates = (coordinates) => {
   if (!Array.isArray(coordinates)) return null
@@ -24,8 +24,9 @@ function ParseForm({ setCoordinates = () => {}, onSuccess }) {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [pendingSubmission, setPendingSubmission] = useState(null)
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     const file = e.target.elements.file.files[0]
     if (!file) return
@@ -48,36 +49,60 @@ function ParseForm({ setCoordinates = () => {}, onSuccess }) {
     formData.append('title', trimmedTitle)
     setLoading(true)
     setError(null)
-    try {
-      const res = await fetch('/api/parse', {
-        method: 'POST',
-        body: formData,
-      })
-      if (!res.ok) throw new Error('Upload failed')
-      const result = await res.json()
-      setData(result)
-
-      setTitle('')
-
-      const normalized = normalizeCoordinates(result.COORDINATES)
-      if (!normalized) {
-        setCoordinates([])
-        setData(null)
-        setError('Invalid coordinates data received from server.')
-        return
-      }
-
-      setCoordinates(normalized)
-      if (onSuccess) {
-        onSuccess(result)
-      }
-    } catch (err) {
-      setError(err.message)
-      setData(null)
-    } finally {
-      setLoading(false)
-    }
+    setPendingSubmission({ formData })
   }
+
+  useEffect(() => {
+    if (!pendingSubmission) return undefined
+
+    const controller = new AbortController()
+    let isActive = true
+
+    const submit = async () => {
+      try {
+        const res = await fetch('/api/parse', {
+          method: 'POST',
+          body: pendingSubmission.formData,
+          signal: controller.signal,
+        })
+        if (!res.ok) throw new Error('Upload failed')
+        const result = await res.json()
+        if (!isActive) return
+
+        setData(result)
+        setTitle('')
+
+        const normalized = normalizeCoordinates(result.COORDINATES)
+        if (!normalized) {
+          setCoordinates([])
+          setData(null)
+          setError('Invalid coordinates data received from server.')
+          return
+        }
+
+        setCoordinates(normalized)
+        if (onSuccess) {
+          onSuccess(result)
+        }
+      } catch (err) {
+        if (!isActive || err.name === 'AbortError') return
+        setError(err.message)
+        setData(null)
+      } finally {
+        if (isActive) {
+          setLoading(false)
+          setPendingSubmission(null)
+        }
+      }
+    }
+
+    submit()
+
+    return () => {
+      isActive = false
+      controller.abort()
+    }
+  }, [pendingSubmission, onSuccess, setCoordinates])
 
   return (
     <div>
