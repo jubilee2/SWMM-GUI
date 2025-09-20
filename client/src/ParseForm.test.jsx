@@ -1,15 +1,22 @@
-import { render, fireEvent, waitFor } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { render, fireEvent, waitFor, cleanup } from '@testing-library/react'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import ParseForm from './ParseForm'
 
 describe('ParseForm', () => {
+  afterEach(() => {
+    cleanup()
+    vi.restoreAllMocks()
+  })
+
   it('passes coordinates from parser to setCoordinates', async () => {
     const setCoordinates = vi.fn()
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ COORDINATES: [{ id: 'n1', x: 1, y: 2 }] })
     })
-    const { container } = render(<ParseForm setCoordinates={setCoordinates} />)
+    const { container } = render(
+      <ParseForm setCoordinates={setCoordinates} onClose={() => {}} />
+    )
     const file = new File(['dummy'], 'test.inp', { type: 'text/plain' })
     const titleInput = container.querySelector('input[name="title"]')
     fireEvent.change(titleInput, { target: { value: 'Test upload' } })
@@ -29,7 +36,9 @@ describe('ParseForm', () => {
       ok: true,
       json: async () => ({})
     })
-    const { container } = render(<ParseForm setCoordinates={setCoordinates} />)
+    const { container } = render(
+      <ParseForm setCoordinates={setCoordinates} onClose={() => {}} />
+    )
     const file = new File(['dummy'], 'test.inp', { type: 'text/plain' })
     const titleInput = container.querySelector('input[name="title"]')
     fireEvent.change(titleInput, { target: { value: 'Another upload' } })
@@ -47,7 +56,9 @@ describe('ParseForm', () => {
   it('prevents submission without a title', async () => {
     const setCoordinates = vi.fn()
     globalThis.fetch = vi.fn()
-    const { container } = render(<ParseForm setCoordinates={setCoordinates} />)
+    const { container } = render(
+      <ParseForm setCoordinates={setCoordinates} onClose={() => {}} />
+    )
     const file = new File(['dummy'], 'test.inp', { type: 'text/plain' })
     const input = container.querySelector('input[type="file"]')
     fireEvent.change(input, { target: { files: [file] } })
@@ -56,5 +67,34 @@ describe('ParseForm', () => {
     expect(container.querySelector('.error-banner')?.textContent).toContain(
       'Title is required.'
     )
+  })
+
+  it('allows closing the modal via the close button', () => {
+    const onClose = vi.fn()
+    const { getByLabelText } = render(
+      <ParseForm setCoordinates={() => {}} onClose={onClose} />
+    )
+    fireEvent.click(getByLabelText('Close upload form'))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('closes the modal when clicking on the backdrop', () => {
+    const onClose = vi.fn()
+    const { container } = render(
+      <ParseForm setCoordinates={() => {}} onClose={onClose} />
+    )
+    const backdrop = container.querySelector('.modal-backdrop')
+    fireEvent.mouseDown(backdrop)
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not close the modal when interacting inside it', () => {
+    const onClose = vi.fn()
+    const { container } = render(
+      <ParseForm setCoordinates={() => {}} onClose={onClose} />
+    )
+    const modal = container.querySelector('.modal')
+    fireEvent.mouseDown(modal)
+    expect(onClose).not.toHaveBeenCalled()
   })
 })
