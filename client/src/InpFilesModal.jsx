@@ -7,7 +7,7 @@ function formatDate(value) {
   return date.toLocaleString()
 }
 
-function InpFilesModal({ onClose }) {
+function InpFilesModal({ onClose, onUploadClick }) {
   const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -84,9 +84,16 @@ function InpFilesModal({ onClose }) {
       <div className="modal">
         <div className="modal-header">
           <h2 id="inp-files-title">Stored INP Files</h2>
-          <button type="button" className="modal-close" onClick={onClose} aria-label="Close stored INP files list">
-            ×
-          </button>
+          <div className="modal-header-actions">
+            {onUploadClick && (
+              <button type="button" className="modal-action" onClick={onUploadClick}>
+                Upload INP File
+              </button>
+            )}
+            <button type="button" className="modal-close" onClick={onClose} aria-label="Close stored INP files list">
+              ×
+            </button>
+          </div>
         </div>
         <div className="modal-body">
           {loading ? (
