@@ -97,4 +97,34 @@ describe('ParseForm', () => {
     fireEvent.mouseDown(modal)
     expect(onClose).not.toHaveBeenCalled()
   })
+
+  it('cycles focus to the first element when tabbing forward from the last', () => {
+    const { getByLabelText, getByText } = render(
+      <ParseForm setCoordinates={() => {}} onClose={() => {}} />
+    )
+
+    const submitButton = getByText('Upload')
+    submitButton.focus()
+    expect(document.activeElement).toBe(submitButton)
+
+    fireEvent.keyDown(submitButton, { key: 'Tab', code: 'Tab' })
+
+    const closeButton = getByLabelText('Close upload form')
+    expect(document.activeElement).toBe(closeButton)
+  })
+
+  it('cycles focus to the last element when shift+tabbing from the first', () => {
+    const { getByLabelText, getByText } = render(
+      <ParseForm setCoordinates={() => {}} onClose={() => {}} />
+    )
+
+    const closeButton = getByLabelText('Close upload form')
+    closeButton.focus()
+    expect(document.activeElement).toBe(closeButton)
+
+    fireEvent.keyDown(closeButton, { key: 'Tab', code: 'Tab', shiftKey: true })
+
+    const submitButton = getByText('Upload')
+    expect(document.activeElement).toBe(submitButton)
+  })
 })

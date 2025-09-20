@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 const normalizeCoordinates = (coordinates) => {
   if (!Array.isArray(coordinates)) return null
@@ -25,10 +25,81 @@ function ParseForm({ setCoordinates, onClose }) {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const titleInputRef = useRef(null)
+  const modalRef = useRef(null)
+  const focusableElementsRef = useRef([])
+
+  const collectFocusableElements = useCallback(() => {
+    const modal = modalRef.current
+    if (!modal) return
+
+    const focusableSelector = [
+      'a[href]',
+      'button:not([disabled])',
+      'textarea:not([disabled])',
+      'input:not([type="hidden"]):not([disabled])',
+      'select:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])'
+    ].join(', ')
+
+    focusableElementsRef.current = Array.from(
+      modal.querySelectorAll(focusableSelector)
+    ).filter((element) => !element.hasAttribute('aria-hidden'))
+
+    if (focusableElementsRef.current.length === 0) {
+      modal.focus()
+    }
+  }, [])
 
   useEffect(() => {
     titleInputRef.current?.focus()
   }, [])
+
+  useEffect(() => {
+    collectFocusableElements()
+  }, [collectFocusableElements, loading, data, error])
+
+  useEffect(() => {
+    const modal = modalRef.current
+    if (!modal) return
+
+    const handleKeyDown = (event) => {
+      if (event.key !== 'Tab') return
+
+      collectFocusableElements()
+
+      const focusableElements = focusableElementsRef.current
+      if (focusableElements.length === 0) {
+        event.preventDefault()
+        return
+      }
+
+      const [firstElement] = focusableElements
+      const lastElement = focusableElements[focusableElements.length - 1]
+      const activeElement = document.activeElement
+
+      if (event.shiftKey) {
+        if (
+          activeElement === firstElement ||
+          !modal.contains(activeElement)
+        ) {
+          lastElement.focus()
+          event.preventDefault()
+        }
+        return
+      }
+
+      if (activeElement === lastElement || !modal.contains(activeElement)) {
+        firstElement.focus()
+        event.preventDefault()
+      }
+    }
+
+    modal.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      modal.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [collectFocusableElements])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -97,7 +168,7 @@ function ParseForm({ setCoordinates, onClose }) {
       aria-labelledby="parse-form-title"
       onMouseDown={handleBackdropMouseDown}
     >
-      <div className="modal" role="document">
+      <div className="modal" role="document" tabIndex={-1} ref={modalRef}>
         <div className="modal-header">
           <h2 id="parse-form-title">Parse INP File</h2>
           {onClose && (
