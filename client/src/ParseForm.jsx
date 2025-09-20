@@ -65,8 +65,6 @@ function ParseForm({ setCoordinates, onClose }) {
     const handleKeyDown = (event) => {
       if (event.key !== 'Tab') return
 
-      collectFocusableElements()
-
       const focusableElements = focusableElementsRef.current
       if (focusableElements.length === 0) {
         event.preventDefault()
