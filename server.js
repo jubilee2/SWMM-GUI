@@ -68,13 +68,36 @@ app.get('/api/inp-files', async (req, res) => {
     const db = getDb();
     const files = await db
       .collection('parses')
-      .find({}, { projection: {  title: 1, filename: 1,uploadedAt: 1 } })
+      .find({}, { projection: { title: 1, filename: 1, uploadedAt: 1 } })
       .sort({ uploadedAt: -1 })
       .toArray();
     res.json(files);
   } catch (err) {
     console.error('Failed to fetch INP files', err);
     res.status(500).json({ error: 'Failed to fetch INP files' });
+  }
+});
+
+app.get('/api/inp-files/:id', async (req, res) => {
+  const { id } = req.params;
+  if (!ObjectId.isValid(id)) {
+    return res.status(400).json({ error: 'Invalid INP file id' });
+  }
+
+  try {
+    const db = getDb();
+    const file = await db
+      .collection('parses')
+      .findOne({ _id: new ObjectId(id) }, { projection: { data: 1, title: 1, filename: 1, uploadedAt: 1 } });
+
+    if (!file) {
+      return res.status(404).json({ error: 'INP file not found' });
+    }
+
+    return res.json(file);
+  } catch (err) {
+    console.error('Failed to load INP file', err);
+    return res.status(500).json({ error: 'Failed to load INP file' });
   }
 });
 

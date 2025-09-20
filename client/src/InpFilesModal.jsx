@@ -7,11 +7,12 @@ function formatDate(value) {
   return date.toLocaleString()
 }
 
-function InpFilesModal({ onClose, onUploadClick }) {
+function InpFilesModal({ onClose, onUploadClick, onLoad }) {
   const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
+  const [loadingId, setLoadingId] = useState(null)
 
   useEffect(() => {
     let isMounted = true
@@ -79,6 +80,19 @@ function InpFilesModal({ onClose, onUploadClick }) {
     }
   }
 
+  const handleLoad = async (id) => {
+    if (!onLoad) return
+    setError(null)
+    setLoadingId(id)
+    try {
+      await onLoad(id)
+    } catch (err) {
+      setError(err.message || 'Failed to load the selected INP file.')
+    } finally {
+      setLoadingId(null)
+    }
+  }
+
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="inp-files-title">
       <div className="modal">
@@ -119,11 +133,22 @@ function InpFilesModal({ onClose, onUploadClick }) {
                     <td>{file.filename || 'Unnamed file'}</td>
                     <td>{formatDate(file.uploadedAt)}</td>
                     <td className="actions-cell">
+                      {onLoad && (
+                        <button
+                          type="button"
+                          className="modal-action"
+                          onClick={() => handleLoad(file._id)}
+                          disabled={loadingId === file._id || deletingId === file._id}
+                          aria-label={`Load ${file.filename || 'stored INP file'}`}
+                        >
+                          {loadingId === file._id ? 'Loading…' : 'Load'}
+                        </button>
+                      )}
                       <button
                         type="button"
                         className="modal-action"
                         onClick={() => handleDelete(file._id)}
-                        disabled={deletingId === file._id}
+                        disabled={deletingId === file._id || loadingId === file._id}
                         aria-label={`Delete ${file.filename || 'stored INP file'}`}
                       >
                         {deletingId === file._id ? 'Deleting…' : 'Delete'}
