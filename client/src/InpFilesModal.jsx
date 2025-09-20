@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import ParseForm from './ParseForm'
 
 function formatDate(value) {
   if (!value) return 'Unknown'
@@ -7,49 +8,61 @@ function formatDate(value) {
   return date.toLocaleString()
 }
 
-function InpFilesModal({ onClose }) {
+function InpFilesModal({ onClose, onUploadSuccess, onUploadError }) {
   const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [showUploader, setShowUploader] = useState(false)
+  const isMountedRef = useRef(true)
 
-  useEffect(() => {
-    let isMounted = true
-    const controller = new AbortController()
-
-    const loadFiles = async () => {
+  const loadFiles = useCallback(
+    async (signal) => {
       try {
-        setLoading(true)
-        setError(null)
-        const response = await fetch('/api/inp-files', {
-          signal: controller.signal,
-        })
+        if (isMountedRef.current) {
+          setLoading(true)
+          setError(null)
+        }
+        const response = await fetch(
+          '/api/inp-files',
+          signal ? { signal } : undefined
+        )
         if (!response.ok) {
           throw new Error('Unable to load INP file index.')
         }
         const data = await response.json()
-        if (isMounted) {
+        if (isMountedRef.current) {
           setFiles(Array.isArray(data) ? data : [])
         }
       } catch (err) {
         if (err.name === 'AbortError') return
-        if (isMounted) {
+        if (isMountedRef.current) {
           setError(err.message)
           setFiles([])
         }
       } finally {
-        if (isMounted) {
+        if (isMountedRef.current) {
           setLoading(false)
         }
       }
-    }
+    },
+    []
+  )
 
-    loadFiles()
-
+  useEffect(() => {
+    isMountedRef.current = true
+    const controller = new AbortController()
+    loadFiles(controller.signal)
     return () => {
-      isMounted = false
+      isMountedRef.current = false
       controller.abort()
     }
-  }, [])
+  }, [loadFiles])
+
+  const handleUploadSuccess = (result, coordinates) => {
+    setShowUploader(false)
+    loadFiles()
+    onUploadSuccess?.(result, coordinates)
+  }
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="inp-files-title">
@@ -61,6 +74,20 @@ function InpFilesModal({ onClose }) {
           </button>
         </div>
         <div className="modal-body">
+          <button
+            type="button"
+            className="modal-toggle"
+            onClick={() => setShowUploader((prev) => !prev)}
+            aria-expanded={showUploader}
+          >
+            {showUploader ? 'Hide upload form' : 'Upload new INP file'}
+          </button>
+          {showUploader && (
+            <ParseForm
+              onUploadSuccess={handleUploadSuccess}
+              onUploadError={onUploadError}
+            />
+          )}
           {loading ? (
             <p>Loading INP files...</p>
           ) : error ? (

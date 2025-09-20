@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 const normalizeCoordinates = (coordinates) => {
   if (!Array.isArray(coordinates)) return null
@@ -19,19 +19,22 @@ const normalizeCoordinates = (coordinates) => {
   return normalized
 }
 
-function ParseForm({ setCoordinates }) {
+function ParseForm({ onUploadSuccess, onUploadError, onUploadStart }) {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const formRef = useRef(null)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const file = e.target.elements.file.files[0]
+    const form = e.target
+    const file = form.elements.file.files[0]
     if (!file) return
 
     if (!file.name.toLowerCase().endsWith('.inp')) {
       setError('Invalid file type. Please upload a .inp file.')
       setData(null)
+      onUploadError?.('Invalid file type. Please upload a .inp file.')
       return
     }
 
@@ -39,6 +42,8 @@ function ParseForm({ setCoordinates }) {
     formData.append('file', file)
     setLoading(true)
     setError(null)
+    setData(null)
+    onUploadStart?.()
     try {
       const res = await fetch('/api/parse', {
         method: 'POST',
@@ -46,20 +51,23 @@ function ParseForm({ setCoordinates }) {
       })
       if (!res.ok) throw new Error('Upload failed')
       const result = await res.json()
-      setData(result)
 
       const normalized = normalizeCoordinates(result.COORDINATES)
       if (!normalized) {
-        setCoordinates([])
+        const message = 'Invalid coordinates data received from server.'
+        setError(message)
         setData(null)
-        setError('Invalid coordinates data received from server.')
+        onUploadError?.(message)
         return
       }
 
-      setCoordinates(normalized)
+      setData(result)
+      formRef.current?.reset()
+      onUploadSuccess?.(result, normalized)
     } catch (err) {
       setError(err.message)
       setData(null)
+      onUploadError?.(err.message)
     } finally {
       setLoading(false)
     }
@@ -68,7 +76,7 @@ function ParseForm({ setCoordinates }) {
   return (
     <div>
       <h2>Parse INP File</h2>
-      <form onSubmit={handleSubmit}>
+      <form ref={formRef} onSubmit={handleSubmit}>
         <input type="file" name="file" accept=".inp" />
         <button type="submit">Upload</button>
       </form>
