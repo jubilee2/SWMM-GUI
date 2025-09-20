@@ -61,4 +61,55 @@ describe('InpFilesModal', () => {
       expect(screen.queryByText('Example.inp')).not.toBeInTheDocument()
     })
   })
+
+  it('reloads the index after a successful upload', async () => {
+    const setCoordinates = vi.fn()
+    const file = new File(['dummy'], 'upload.inp', { type: 'text/plain' })
+
+    globalThis.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          COORDINATES: [
+            { id: 'n1', x: 1, y: 2 },
+            { id: 'n2', x: 3, y: 4 },
+          ],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [
+          {
+            _id: 'new123',
+            filename: 'upload.inp',
+            title: 'Uploaded Model',
+            uploadedAt: '2024-05-01T12:00:00.000Z',
+          },
+        ],
+      })
+
+    render(<InpFilesModal onClose={onClose} setCoordinates={setCoordinates} />)
+
+    const titleInput = await screen.findByLabelText('Title')
+    fireEvent.change(titleInput, { target: { value: 'Uploaded Model' } })
+
+    const fileInput = titleInput.form.querySelector('input[type="file"]')
+    fireEvent.change(fileInput, { target: { files: [file] } })
+
+    fireEvent.submit(titleInput.form)
+
+    await waitFor(() => {
+      expect(globalThis.fetch).toHaveBeenNthCalledWith(3, '/api/inp-files', {
+        signal: undefined,
+      })
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Uploaded Model')).toBeInTheDocument()
+    })
+  })
 })

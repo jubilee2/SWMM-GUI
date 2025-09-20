@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import ParseForm from './ParseForm'
 
 function formatDate(value) {
   if (!value) return 'Unknown'
@@ -7,50 +8,40 @@ function formatDate(value) {
   return date.toLocaleString()
 }
 
-function InpFilesModal({ onClose }) {
+function InpFilesModal({ onClose, setCoordinates = () => {} }) {
   const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
 
-  useEffect(() => {
-    let isMounted = true
-    const controller = new AbortController()
-
-    const loadFiles = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const response = await fetch('/api/inp-files', {
-          signal: controller.signal,
-        })
-        if (!response.ok) {
-          throw new Error('Unable to load INP file index.')
-        }
-        const data = await response.json()
-        if (isMounted) {
-          setFiles(Array.isArray(data) ? data : [])
-        }
-      } catch (err) {
-        if (err.name === 'AbortError') return
-        if (isMounted) {
-          setError(err.message)
-          setFiles([])
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false)
-        }
+  const loadFiles = useCallback(async (signal) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await fetch('/api/inp-files', {
+        signal,
+      })
+      if (!response.ok) {
+        throw new Error('Unable to load INP file index.')
       }
-    }
-
-    loadFiles()
-
-    return () => {
-      isMounted = false
-      controller.abort()
+      const data = await response.json()
+      setFiles(Array.isArray(data) ? data : [])
+    } catch (err) {
+      if (err.name === 'AbortError') return
+      setError(err.message)
+      setFiles([])
+    } finally {
+      setLoading(false)
     }
   }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    loadFiles(controller.signal)
+    return () => {
+      controller.abort()
+    }
+  }, [loadFiles])
 
   const handleDelete = async (id) => {
     setError(null)
@@ -89,6 +80,7 @@ function InpFilesModal({ onClose }) {
           </button>
         </div>
         <div className="modal-body">
+          <ParseForm setCoordinates={setCoordinates} onSuccess={() => loadFiles()} />
           {loading ? (
             <p>Loading INP files...</p>
           ) : error ? (

@@ -19,7 +19,7 @@ const normalizeCoordinates = (coordinates) => {
   return normalized
 }
 
-function ParseForm({ setCoordinates }) {
+function ParseForm({ setCoordinates = () => {}, onSuccess }) {
   const [title, setTitle] = useState('')
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
@@ -68,6 +68,9 @@ function ParseForm({ setCoordinates }) {
       }
 
       setCoordinates(normalized)
+      if (onSuccess) {
+        onSuccess(result)
+      }
     } catch (err) {
       setError(err.message)
       setData(null)

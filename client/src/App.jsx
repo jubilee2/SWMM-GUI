@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import MapView from './MapView'
 import ResultsView from './ResultsView'
-import ParseForm from './ParseForm'
 import InpFilesModal from './InpFilesModal'
 
 function App() {
@@ -46,11 +45,13 @@ function App() {
       </button>
       <h1>SWMM Output</h1>
       <pre className="output">{output}</pre>
-      <ParseForm setCoordinates={setCoordinates} />
       <MapView coordinates={coordinates} />
       <ResultsView />
       {showInpFilesModal && (
-        <InpFilesModal onClose={() => setShowInpFilesModal(false)} />
+        <InpFilesModal
+          onClose={() => setShowInpFilesModal(false)}
+          setCoordinates={setCoordinates}
+        />
       )}
     </div>
   )
