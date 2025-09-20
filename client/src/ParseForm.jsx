@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const normalizeCoordinates = (coordinates) => {
   if (!Array.isArray(coordinates)) return null
@@ -19,15 +19,21 @@ const normalizeCoordinates = (coordinates) => {
   return normalized
 }
 
-function ParseForm({ setCoordinates }) {
+function ParseForm({ setCoordinates, onClose }) {
   const [title, setTitle] = useState('')
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const titleInputRef = useRef(null)
+
+  useEffect(() => {
+    titleInputRef.current?.focus()
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const file = e.target.elements.file.files[0]
+    const formElement = e.target
+    const file = formElement.elements.file.files[0]
     if (!file) return
 
     const trimmedTitle = title.trim()
@@ -58,6 +64,7 @@ function ParseForm({ setCoordinates }) {
       setData(result)
 
       setTitle('')
+      formElement.reset()
 
       const normalized = normalizeCoordinates(result.COORDINATES)
       if (!normalized) {
@@ -76,32 +83,63 @@ function ParseForm({ setCoordinates }) {
     }
   }
 
+  const handleBackdropMouseDown = (event) => {
+    if (event.target === event.currentTarget && onClose) {
+      onClose()
+    }
+  }
+
   return (
-    <div>
-      <h2>Parse INP File</h2>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="title">Title</label>
-        <input
-          id="title"
-          name="title"
-          type="text"
-          value={title}
-          onChange={(event) => {
-            setTitle(event.target.value)
-            if (error === 'Title is required.') {
-              setError(null)
-            }
-          }}
-          required
-        />
-        <input type="file" name="file" accept=".inp" />
-        <button type="submit">Upload</button>
-      </form>
-      {loading && <p>Parsing...</p>}
-      {error && <div className="error-banner">{error}</div>}
-      {data && (
-        <pre className="output">{JSON.stringify(data, null, 2)}</pre>
-      )}
+    <div
+      className="modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="parse-form-title"
+      onMouseDown={handleBackdropMouseDown}
+    >
+      <div className="modal" role="document">
+        <div className="modal-header">
+          <h2 id="parse-form-title">Parse INP File</h2>
+          {onClose && (
+            <button
+              type="button"
+              className="modal-close"
+              onClick={onClose}
+              aria-label="Close upload form"
+            >
+              ×
+            </button>
+          )}
+        </div>
+        <div className="modal-body">
+          <form onSubmit={handleSubmit}>
+            <label htmlFor="title">Title</label>
+            <input
+              id="title"
+              name="title"
+              type="text"
+              value={title}
+              ref={titleInputRef}
+              onChange={(event) => {
+                setTitle(event.target.value)
+                if (error === 'Title is required.') {
+                  setError(null)
+                }
+              }}
+              required
+            />
+            <input type="file" name="file" accept=".inp" />
+            <button type="submit" disabled={loading}>
+              {loading ? 'Uploading…' : 'Upload'}
+            </button>
+          </form>
+          {loading && <p>Parsing...</p>}
+          {error && <div className="error-banner">{error}</div>}
+          {data && (
+            <pre className="output">{JSON.stringify(data, null, 2)}</pre>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

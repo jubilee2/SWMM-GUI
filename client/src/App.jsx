@@ -10,6 +10,7 @@ function App() {
   const [coordinates, setCoordinates] = useState([])
   const [theme, setTheme] = useState('light')
   const [showInpFilesModal, setShowInpFilesModal] = useState(false)
+  const [showUploadModal, setShowUploadModal] = useState(false)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -38,7 +39,14 @@ function App() {
         {theme === 'light' ? '🌞' : '🌜'}
       </button>
       <button
-        className="inp-files-button"
+        className="action-button"
+        type="button"
+        onClick={() => setShowUploadModal(true)}
+      >
+        Upload INP File
+      </button>
+      <button
+        className="action-button"
         type="button"
         onClick={() => setShowInpFilesModal(true)}
       >
@@ -46,9 +54,14 @@ function App() {
       </button>
       <h1>SWMM Output</h1>
       <pre className="output">{output}</pre>
-      <ParseForm setCoordinates={setCoordinates} />
       <MapView coordinates={coordinates} />
       <ResultsView />
+      {showUploadModal && (
+        <ParseForm
+          setCoordinates={setCoordinates}
+          onClose={() => setShowUploadModal(false)}
+        />
+      )}
       {showInpFilesModal && (
         <InpFilesModal onClose={() => setShowInpFilesModal(false)} />
       )}
