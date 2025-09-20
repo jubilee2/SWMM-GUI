@@ -41,13 +41,6 @@ function App() {
       <button
         className="action-button"
         type="button"
-        onClick={() => setShowUploadModal(true)}
-      >
-        Upload INP File
-      </button>
-      <button
-        className="action-button"
-        type="button"
         onClick={() => setShowInpFilesModal(true)}
       >
         View Stored INP Files
@@ -63,7 +56,13 @@ function App() {
         />
       )}
       {showInpFilesModal && (
-        <InpFilesModal onClose={() => setShowInpFilesModal(false)} />
+        <InpFilesModal
+          onClose={() => setShowInpFilesModal(false)}
+          onUploadClick={() => {
+            setShowUploadModal(true)
+            setShowInpFilesModal(false)
+          }}
+        />
       )}
     </div>
   )

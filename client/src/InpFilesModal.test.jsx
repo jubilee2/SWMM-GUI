@@ -11,10 +11,13 @@ function createDeferred() {
 }
 
 describe('InpFilesModal', () => {
-  const onClose = vi.fn()
+  let onClose
+  let onUploadClick
   const originalFetch = globalThis.fetch
 
   beforeEach(() => {
+    onClose = vi.fn()
+    onUploadClick = vi.fn()
     globalThis.fetch = vi.fn()
   })
 
@@ -40,7 +43,7 @@ describe('InpFilesModal', () => {
       })
       .mockReturnValueOnce(deleteDeferred.promise)
 
-    render(<InpFilesModal onClose={onClose} />)
+    render(<InpFilesModal onClose={onClose} onUploadClick={onUploadClick} />)
 
     expect(await screen.findByText('Example model')).toBeInTheDocument()
     const deleteButton = await screen.findByRole('button', { name: 'Delete Example.inp' })
@@ -60,5 +63,19 @@ describe('InpFilesModal', () => {
     await waitFor(() => {
       expect(screen.queryByText('Example.inp')).not.toBeInTheDocument()
     })
+  })
+
+  it('renders the upload button and triggers callback when clicked', async () => {
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [],
+    })
+
+    render(<InpFilesModal onClose={onClose} onUploadClick={onUploadClick} />)
+
+    const uploadButtons = await screen.findAllByRole('button', { name: 'Upload INP File' })
+    uploadButtons.forEach((button) => fireEvent.click(button))
+
+    expect(onUploadClick).toHaveBeenCalled()
   })
 })
