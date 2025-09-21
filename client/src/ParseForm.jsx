@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import normalizeCoordinates from './normalizeCoordinates'
 
-function ParseForm({ setCoordinates, onClose }) {
+function ParseForm({ onClose }) {
   const [title, setTitle] = useState('')
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
@@ -116,16 +115,6 @@ function ParseForm({ setCoordinates, onClose }) {
 
       setTitle('')
       formElement.reset()
-
-      const normalized = normalizeCoordinates(result.COORDINATES)
-      if (!normalized) {
-        setCoordinates([])
-        setData(null)
-        setError('Invalid coordinates data received from server.')
-        return
-      }
-
-      setCoordinates(normalized)
     } catch (err) {
       setError(err.message)
       setData(null)
