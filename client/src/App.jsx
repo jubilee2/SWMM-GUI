@@ -77,10 +77,7 @@ function App() {
       <MapView coordinates={coordinates} />
       <ResultsView />
       {showUploadModal && (
-        <ParseForm
-          setCoordinates={setCoordinates}
-          onClose={() => setShowUploadModal(false)}
-        />
+        <ParseForm onClose={() => setShowUploadModal(false)} />
       )}
       {showInpFilesModal && (
         <InpFilesModal
