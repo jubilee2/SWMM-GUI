@@ -133,6 +133,63 @@ describe('GET /api/inp-files', () => {
   });
 });
 
+describe('GET /api/inp-files/:id', () => {
+  it('returns stored INP file data when found', async () => {
+    const record = {
+      _id: '507f1f77bcf86cd799439011',
+      filename: 'sample.inp',
+      title: 'Sample',
+      uploadedAt: '2024-01-01T00:00:00.000Z',
+      data: { COORDINATES: [{ id: 'n1', x: 1, y: 2 }] },
+    };
+    const db = require('../server/db');
+    vi.spyOn(db, 'getDb').mockReturnValue({
+      collection: () => ({
+        findOne: () => Promise.resolve(record),
+      }),
+    });
+    vi.resetModules();
+    const { default: app } = await import('../server.js');
+    const res = await request(app).get('/api/inp-files/507f1f77bcf86cd799439011');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(record);
+  });
+
+  it('returns 400 for an invalid id', async () => {
+    vi.resetModules();
+    const { default: app } = await import('../server.js');
+    const res = await request(app).get('/api/inp-files/not-an-id');
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Invalid INP file id');
+  });
+
+  it('returns 404 when record is missing', async () => {
+    const db = require('../server/db');
+    vi.spyOn(db, 'getDb').mockReturnValue({
+      collection: () => ({
+        findOne: () => Promise.resolve(null),
+      }),
+    });
+    vi.resetModules();
+    const { default: app } = await import('../server.js');
+    const res = await request(app).get('/api/inp-files/507f1f77bcf86cd799439011');
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('INP file not found');
+  });
+
+  it('returns 500 when database access fails', async () => {
+    const db = require('../server/db');
+    vi.spyOn(db, 'getDb').mockImplementation(() => {
+      throw new Error('no db');
+    });
+    vi.resetModules();
+    const { default: app } = await import('../server.js');
+    const res = await request(app).get('/api/inp-files/507f1f77bcf86cd799439011');
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('Failed to load INP file');
+  });
+});
+
 describe('DELETE /api/inp-files/:id', () => {
   it('returns 400 for an invalid id', async () => {
     vi.resetModules();

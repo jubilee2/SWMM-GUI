@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import './App.css'
 import MapView from './MapView'
 import ResultsView from './ResultsView'
 import ParseForm from './ParseForm'
 import InpFilesModal from './InpFilesModal'
+import normalizeCoordinates from './normalizeCoordinates'
 
 function App() {
   const [output, setOutput] = useState('Loading...')
@@ -11,7 +12,7 @@ function App() {
   const [theme, setTheme] = useState('light')
   const [showInpFilesModal, setShowInpFilesModal] = useState(false)
   const [showUploadModal, setShowUploadModal] = useState(false)
-
+  
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
@@ -26,6 +27,32 @@ function App() {
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
   }
+
+  const handleLoadInpFile = useCallback(async (id) => {
+    const response = await fetch(`/api/inp-files/${id}`)
+    if (!response.ok) {
+      let message = 'Failed to load the selected INP file.'
+      try {
+        const errorBody = await response.json()
+        if (errorBody?.error) {
+          message = errorBody.error
+        }
+      } catch (err) {
+        console.debug('Error parsing INP load error response:', err)
+      }
+      throw new Error(message)
+    }
+
+    const payload = await response.json()
+    const normalized = normalizeCoordinates(payload?.data?.COORDINATES)
+
+    if (!normalized) {
+      setCoordinates([])
+      throw new Error('Loaded INP file is missing valid coordinate data.')
+    }
+
+    setCoordinates(normalized)
+  }, [setCoordinates])
 
   return (
     <div>
@@ -60,6 +87,10 @@ function App() {
           onClose={() => setShowInpFilesModal(false)}
           onUploadClick={() => {
             setShowUploadModal(true)
+            setShowInpFilesModal(false)
+          }}
+          onLoad={async (id) => {
+            await handleLoadInpFile(id)
             setShowInpFilesModal(false)
           }}
         />
