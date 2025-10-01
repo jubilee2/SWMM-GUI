@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "build": "npm --prefix client run build",
-    "dev": "nodemon server.js",
+    "dev": "nodemon --watch server.js --watch server/ server.js",
     "test:server": "vitest run --dir test"
   },
   "keywords": [],
