@@ -78,4 +78,98 @@ describe('InpFilesModal', () => {
 
     expect(onUploadClick).toHaveBeenCalled()
   })
+
+  it('renders upload report buttons for each stored file', async () => {
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [
+        {
+          _id: 'abc123',
+          filename: 'Example.inp',
+          title: 'Example model',
+          uploadedAt: '2024-01-01T00:00:00.000Z',
+        },
+      ],
+    })
+
+    render(<InpFilesModal onClose={onClose} onUploadClick={onUploadClick} />)
+
+    const uploadReportButton = await screen.findByRole('button', {
+      name: 'Upload report for Example.inp',
+    })
+
+    expect(uploadReportButton).toBeInTheDocument()
+  })
+
+  it('opens the report upload modal and posts the selected file', async () => {
+    const fileRecord = {
+      _id: 'abc123',
+      filename: 'Example.inp',
+      title: 'Example model',
+      uploadedAt: '2024-01-01T00:00:00.000Z',
+    }
+
+    globalThis.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [fileRecord],
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [fileRecord],
+      })
+
+    render(<InpFilesModal onClose={onClose} onUploadClick={onUploadClick} />)
+
+    const uploadReportButton = await screen.findByRole('button', {
+      name: 'Upload report for Example.inp',
+    })
+
+    fireEvent.click(uploadReportButton)
+
+    const modal = await screen.findByRole('dialog', { name: 'Upload Report' })
+    expect(modal).toBeInTheDocument()
+
+    const fileInput = screen.getByLabelText('Report file')
+    const reportFile = new File(['test content'], 'example.rpt', {
+      type: 'text/plain',
+    })
+
+    fireEvent.change(fileInput, { target: { files: [reportFile] } })
+
+    const submitButton = screen.getByRole('button', { name: 'Upload' })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(globalThis.fetch).toHaveBeenNthCalledWith(
+        2,
+        '/api/inp-files/abc123/report',
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.any(FormData),
+        })
+      )
+    })
+
+    const [, postOptions] = globalThis.fetch.mock.calls[1]
+    expect(postOptions.body.get('file')).toBe(reportFile)
+
+    await waitFor(() => {
+      expect(globalThis.fetch).toHaveBeenNthCalledWith(
+        3,
+        '/api/inp-files',
+        expect.objectContaining({ signal: undefined })
+      )
+    })
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Upload Report' })).not.toBeInTheDocument()
+    })
+
+    expect(await screen.findByText('Report uploaded successfully.')).toBeInTheDocument()
+  })
 })

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import ReportUploadModal from './ReportUploadModal'
 
 function formatDate(value) {
   if (!value) return 'Unknown'
@@ -13,48 +14,57 @@ function InpFilesModal({ onClose, onUploadClick, onLoad }) {
   const [error, setError] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
   const [loadingId, setLoadingId] = useState(null)
+  const [reportTarget, setReportTarget] = useState(null)
+  const [statusMessage, setStatusMessage] = useState(null)
+  const isMountedRef = useRef(true)
 
   useEffect(() => {
-    let isMounted = true
-    const controller = new AbortController()
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
-    const loadFiles = async () => {
+  const loadFiles = useCallback(
+    async (signal) => {
       try {
         setLoading(true)
         setError(null)
         const response = await fetch('/api/inp-files', {
-          signal: controller.signal,
+          signal,
         })
         if (!response.ok) {
           throw new Error('Unable to load INP file index.')
         }
         const data = await response.json()
-        if (isMounted) {
-          setFiles(Array.isArray(data) ? data : [])
-        }
+        if (!isMountedRef.current) return
+        setFiles(Array.isArray(data) ? data : [])
       } catch (err) {
         if (err.name === 'AbortError') return
-        if (isMounted) {
-          setError(err.message)
-          setFiles([])
-        }
+        if (!isMountedRef.current) return
+        setError(err.message)
+        setFiles([])
       } finally {
-        if (isMounted) {
-          setLoading(false)
-        }
+        if (!isMountedRef.current) return
+        setLoading(false)
       }
-    }
+    },
+    []
+  )
 
-    loadFiles()
+  useEffect(() => {
+    const controller = new AbortController()
+
+    loadFiles(controller.signal)
 
     return () => {
-      isMounted = false
       controller.abort()
     }
-  }, [])
+  }, [loadFiles])
 
   const handleDelete = async (id) => {
     setError(null)
+    setStatusMessage(null)
     setDeletingId(id)
     try {
       const response = await fetch(`/api/inp-files/${id}`, {
@@ -83,6 +93,7 @@ function InpFilesModal({ onClose, onUploadClick, onLoad }) {
   const handleLoad = async (id) => {
     if (!onLoad) return
     setError(null)
+    setStatusMessage(null)
     setLoadingId(id)
     try {
       await onLoad(id)
@@ -91,6 +102,12 @@ function InpFilesModal({ onClose, onUploadClick, onLoad }) {
     } finally {
       setLoadingId(null)
     }
+  }
+
+  const handleReportUploadSuccess = () => {
+    setReportTarget(null)
+    setStatusMessage('Report uploaded successfully.')
+    loadFiles()
   }
 
   return (
@@ -114,7 +131,10 @@ function InpFilesModal({ onClose, onUploadClick, onLoad }) {
             <p>Loading INP files...</p>
           ) : error ? (
             <div className="error-banner">{error}</div>
-          ) : files.length > 0 ? (
+          ) : (
+            statusMessage && <div className="success-banner">{statusMessage}</div>
+          )}
+          {!loading && !error && files.length > 0 ? (
             <table className="modal-table">
               <thead>
                 <tr>
@@ -153,16 +173,34 @@ function InpFilesModal({ onClose, onUploadClick, onLoad }) {
                       >
                         {deletingId === file._id ? 'Deleting…' : 'Delete'}
                       </button>
+                      <button
+                        type="button"
+                        className="modal-action"
+                        onClick={() => {
+                          setStatusMessage(null)
+                          setReportTarget(file)
+                        }}
+                        aria-label={`Upload report for ${file.filename || 'stored INP file'}`}
+                      >
+                        Upload Report
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          ) : (
+          ) : !loading && !error ? (
             <p>No INP files have been stored yet.</p>
-          )}
+          ) : null}
         </div>
       </div>
+      {reportTarget && (
+        <ReportUploadModal
+          file={reportTarget}
+          onClose={() => setReportTarget(null)}
+          onSuccess={handleReportUploadSuccess}
+        />
+      )}
     </div>
   )
 }
