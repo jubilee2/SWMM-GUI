@@ -92,7 +92,7 @@ app.post('/api/inp-files/:id/report', upload.single('file'), async (req, res) =>
 
     let parsedReport;
     try {
-      parsedReport = parseReport(req.file.path);
+      parsedReport = await parseReport(req.file.path);
     } catch (err) {
       if (err instanceof ReportParseError) {
         return res.status(422).json({ error: err.message });
