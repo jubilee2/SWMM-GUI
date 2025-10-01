@@ -247,6 +247,37 @@ describe('DELETE /api/inp-files/:id', () => {
 
 describe('POST /api/inp-files/:id/report', () => {
   const validId = '507f1f77bcf86cd799439011';
+  const createMinimalReport = () => ({
+    elementCount: {
+      rainGages: 0,
+      subcatchments: 0,
+      nodes: 0,
+      links: 0,
+      pollutants: 0,
+      landUses: 0,
+    },
+    nodeSummary: [],
+    linkSummary: [],
+    crossSectionSummary: [],
+    analysisOptions: {
+      flowUnits: 'CMS',
+      processModels: {},
+    },
+    flowRoutingContinuity: {
+      dryWeatherInflow: { hectareMeters: 0, millionLiters: 0 },
+      wetWeatherInflow: { hectareMeters: 0, millionLiters: 0 },
+      groundwaterInflow: { hectareMeters: 0, millionLiters: 0 },
+      rdiiInflow: { hectareMeters: 0, millionLiters: 0 },
+      externalInflow: { hectareMeters: 0, millionLiters: 0 },
+      externalOutflow: { hectareMeters: 0, millionLiters: 0 },
+      floodingLoss: { hectareMeters: 0, millionLiters: 0 },
+      evaporationLoss: { hectareMeters: 0, millionLiters: 0 },
+      exfiltrationLoss: { hectareMeters: 0, millionLiters: 0 },
+      initialStoredVolume: { hectareMeters: 0, millionLiters: 0 },
+      finalStoredVolume: { hectareMeters: 0, millionLiters: 0 },
+      continuityErrorPercent: 0,
+    },
+  });
 
   it('stores parsed report data and returns the saved payload', async () => {
     vi.resetModules();
@@ -254,17 +285,11 @@ describe('POST /api/inp-files/:id/report', () => {
     let uploadedPath;
     vi.spyOn(parser, 'parseReport').mockImplementation((filePath) => {
       uploadedPath = filePath;
-      return {
-        inpFile: 'model.inp',
-        startDate: '01/01/2024 00:00:00',
-        endDate: '01/01/2024 01:00:00',
-        flowUnits: 'CFS',
-        totals: {
-          inflow: 10,
-          outflow: 9,
-          peakFlow: 2,
-        },
-      };
+      const report = createMinimalReport();
+      report.elementCount.nodes = 10;
+      report.elementCount.links = 12;
+      report.analysisOptions.processModels.flowRouting = 'YES';
+      return report;
     });
 
     const db = require('../server/db');
@@ -290,9 +315,13 @@ describe('POST /api/inp-files/:id/report', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
-      inpFile: 'model.inp',
-      flowUnits: 'CFS',
-      totals: { inflow: 10, outflow: 9, peakFlow: 2 },
+      elementCount: {
+        nodes: 10,
+        links: 12,
+      },
+      analysisOptions: {
+        flowUnits: 'CMS',
+      },
       filename: 'sample-report.rpt',
     });
     expect(new Date(res.body.uploadedAt).toString()).not.toBe('Invalid Date');
@@ -365,13 +394,7 @@ describe('POST /api/inp-files/:id/report', () => {
   it('returns 404 when the INP file is missing', async () => {
     vi.resetModules();
     const parser = require('../server/reportParser.js');
-    vi.spyOn(parser, 'parseReport').mockReturnValue({
-      inpFile: 'model.inp',
-      startDate: '01/01/2024 00:00:00',
-      endDate: '01/01/2024 01:00:00',
-      flowUnits: 'CFS',
-      totals: { inflow: 1, outflow: 1, peakFlow: 1 },
-    });
+    vi.spyOn(parser, 'parseReport').mockReturnValue(createMinimalReport());
     const db = require('../server/db');
     const findOneAndUpdate = vi.fn().mockResolvedValue({ value: null });
     vi.spyOn(db, 'getDb').mockReturnValue({
@@ -392,13 +415,7 @@ describe('POST /api/inp-files/:id/report', () => {
   it('returns 500 when persistence fails', async () => {
     vi.resetModules();
     const parser = require('../server/reportParser.js');
-    vi.spyOn(parser, 'parseReport').mockReturnValue({
-      inpFile: 'model.inp',
-      startDate: '01/01/2024 00:00:00',
-      endDate: '01/01/2024 01:00:00',
-      flowUnits: 'CFS',
-      totals: { inflow: 1, outflow: 1, peakFlow: 1 },
-    });
+    vi.spyOn(parser, 'parseReport').mockReturnValue(createMinimalReport());
     const db = require('../server/db');
     vi.spyOn(db, 'getDb').mockReturnValue({
       collection: () => ({
