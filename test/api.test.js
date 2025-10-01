@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import request from 'supertest';
 import { describe, it, expect, vi, afterEach } from 'vitest';
@@ -241,5 +242,179 @@ describe('DELETE /api/inp-files/:id', () => {
     const res = await request(app).delete('/api/inp-files/507f1f77bcf86cd799439011');
     expect(res.status).toBe(500);
     expect(res.body.error).toBe('Failed to delete INP file');
+  });
+});
+
+describe('POST /api/inp-files/:id/report', () => {
+  const validId = '507f1f77bcf86cd799439011';
+
+  it('stores parsed report data and returns the saved payload', async () => {
+    vi.resetModules();
+    const parser = require('../server/reportParser.js');
+    let uploadedPath;
+    vi.spyOn(parser, 'parseReport').mockImplementation((filePath) => {
+      uploadedPath = filePath;
+      return {
+        inpFile: 'model.inp',
+        startDate: '01/01/2024 00:00:00',
+        endDate: '01/01/2024 01:00:00',
+        flowUnits: 'CFS',
+        totals: {
+          inflow: 10,
+          outflow: 9,
+          peakFlow: 2,
+        },
+      };
+    });
+
+    const db = require('../server/db');
+    let savedReport;
+    const findOneAndUpdate = vi.fn().mockImplementation((_filter, update) => {
+      savedReport = update.$set.report;
+      return Promise.resolve({ value: { report: savedReport } });
+    });
+    vi.spyOn(db, 'getDb').mockReturnValue({
+      collection: () => ({ findOneAndUpdate }),
+    });
+    let cleanedPath;
+    vi.spyOn(fs, 'unlink').mockImplementation((filePath, cb) => {
+      cleanedPath = filePath;
+      cb && cb();
+    });
+
+    const { default: app } = await import('../server.js');
+    const file = path.join(__dirname, 'data', 'sample-report.rpt');
+    const res = await request(app)
+      .post(`/api/inp-files/${validId}/report`)
+      .attach('report', file);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      inpFile: 'model.inp',
+      flowUnits: 'CFS',
+      totals: { inflow: 10, outflow: 9, peakFlow: 2 },
+      filename: 'sample-report.rpt',
+    });
+    expect(new Date(res.body.uploadedAt).toString()).not.toBe('Invalid Date');
+    expect(savedReport.filename).toBe('sample-report.rpt');
+    expect(savedReport.uploadedAt).toBeInstanceOf(Date);
+    expect(findOneAndUpdate).toHaveBeenCalledTimes(1);
+    const [filter, , options] = findOneAndUpdate.mock.calls[0];
+    expect(filter._id.toHexString()).toBe(validId);
+    expect(options).toEqual({ returnDocument: 'after' });
+    expect(cleanedPath).toBe(uploadedPath);
+  });
+
+  it('returns 400 when id is invalid and cleans up temp file', async () => {
+    vi.resetModules();
+    const parser = require('../server/reportParser.js');
+    const parseSpy = vi.spyOn(parser, 'parseReport');
+    const unlinkSpy = vi.spyOn(fs, 'unlink').mockImplementation((_, cb) => cb && cb());
+    const { default: app } = await import('../server.js');
+    const file = path.join(__dirname, 'data', 'sample-report.rpt');
+    const res = await request(app).post('/api/inp-files/not-an-id/report').attach('report', file);
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Invalid INP file id');
+    expect(parseSpy).not.toHaveBeenCalled();
+    expect(unlinkSpy).toHaveBeenCalled();
+  });
+
+  it('returns 400 when no report is uploaded', async () => {
+    vi.resetModules();
+    const { default: app } = await import('../server.js');
+    const res = await request(app).post(`/api/inp-files/${validId}/report`);
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('No report uploaded');
+  });
+
+  it('rejects unsupported file extensions', async () => {
+    vi.resetModules();
+    const unlinkSpy = vi.spyOn(fs, 'unlink').mockImplementation((_, cb) => cb && cb());
+    const { default: app } = await import('../server.js');
+    const file = path.join(__dirname, 'data', 'sample.txt');
+    const res = await request(app)
+      .post(`/api/inp-files/${validId}/report`)
+      .attach('report', file);
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Unsupported report type');
+    expect(unlinkSpy).toHaveBeenCalled();
+  });
+
+  it('returns 422 when the parser reports malformed data', async () => {
+    vi.resetModules();
+    const parser = require('../server/reportParser.js');
+    const { ReportParseError } = parser;
+    vi.spyOn(parser, 'parseReport').mockImplementation(() => {
+      throw new ReportParseError('Report malformed');
+    });
+    const unlinkSpy = vi.spyOn(fs, 'unlink').mockImplementation((_, cb) => cb && cb());
+    const db = require('../server/db');
+    vi.spyOn(db, 'getDb').mockReturnValue({
+      collection: () => ({ findOneAndUpdate: vi.fn() }),
+    });
+    const { default: app } = await import('../server.js');
+    const file = path.join(__dirname, 'data', 'sample-report.rpt');
+    const res = await request(app)
+      .post(`/api/inp-files/${validId}/report`)
+      .attach('report', file);
+    expect(res.status).toBe(422);
+    expect(res.body.error).toBe('Report malformed');
+    expect(unlinkSpy).toHaveBeenCalled();
+  });
+
+  it('returns 404 when the INP file is missing', async () => {
+    vi.resetModules();
+    const parser = require('../server/reportParser.js');
+    vi.spyOn(parser, 'parseReport').mockReturnValue({
+      inpFile: 'model.inp',
+      startDate: '01/01/2024 00:00:00',
+      endDate: '01/01/2024 01:00:00',
+      flowUnits: 'CFS',
+      totals: { inflow: 1, outflow: 1, peakFlow: 1 },
+    });
+    const db = require('../server/db');
+    const findOneAndUpdate = vi.fn().mockResolvedValue({ value: null });
+    vi.spyOn(db, 'getDb').mockReturnValue({
+      collection: () => ({ findOneAndUpdate }),
+    });
+    const unlinkSpy = vi.spyOn(fs, 'unlink').mockImplementation((_, cb) => cb && cb());
+    const { default: app } = await import('../server.js');
+    const file = path.join(__dirname, 'data', 'sample-report.rpt');
+    const res = await request(app)
+      .post(`/api/inp-files/${validId}/report`)
+      .attach('report', file);
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('INP file not found');
+    expect(findOneAndUpdate).toHaveBeenCalled();
+    expect(unlinkSpy).toHaveBeenCalled();
+  });
+
+  it('returns 500 when persistence fails', async () => {
+    vi.resetModules();
+    const parser = require('../server/reportParser.js');
+    vi.spyOn(parser, 'parseReport').mockReturnValue({
+      inpFile: 'model.inp',
+      startDate: '01/01/2024 00:00:00',
+      endDate: '01/01/2024 01:00:00',
+      flowUnits: 'CFS',
+      totals: { inflow: 1, outflow: 1, peakFlow: 1 },
+    });
+    const db = require('../server/db');
+    vi.spyOn(db, 'getDb').mockReturnValue({
+      collection: () => ({
+        findOneAndUpdate: () => {
+          throw new Error('db down');
+        },
+      }),
+    });
+    const unlinkSpy = vi.spyOn(fs, 'unlink').mockImplementation((_, cb) => cb && cb());
+    const { default: app } = await import('../server.js');
+    const file = path.join(__dirname, 'data', 'sample-report.rpt');
+    const res = await request(app)
+      .post(`/api/inp-files/${validId}/report`)
+      .attach('report', file);
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('Failed to save report');
+    expect(unlinkSpy).toHaveBeenCalled();
   });
 });
