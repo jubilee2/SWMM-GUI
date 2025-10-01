@@ -110,7 +110,10 @@ app.post('/api/inp-files/:id/report', upload.single('file'), async (req, res) =>
     const result = await db.collection('parses').findOneAndUpdate(
       { _id: new ObjectId(id) },
       { $set: { report: savedReport } },
-      { returnDocument: 'after' }
+      { 
+        returnDocument: 'after',
+        includeResultMetadata: true
+       }
     );
     cleanup();
 
