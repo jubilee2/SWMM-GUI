@@ -45,8 +45,9 @@ function InpFilesModal({ onClose, onUploadClick, onLoad }) {
         setError(err.message)
         setFiles([])
       } finally {
-        if (!isMountedRef.current) return
-        setLoading(false)
+        if (isMountedRef.current) {
+          setLoading(false)
+        }
       }
     },
     []
