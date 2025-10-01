@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs/promises');
 
 class ReportParseError extends Error {
   constructor(message) {
@@ -77,8 +77,8 @@ const FLOW_ROUTING_LABELS = {
   },
 };
 
-function parseReport(filePath) {
-  const content = fs.readFileSync(filePath, 'utf8');
+async function parseReport(filePath) {
+  const content = await fs.readFile(filePath, 'utf8');
   if (!content.trim()) {
     throw new ReportParseError('Report file is empty');
   }

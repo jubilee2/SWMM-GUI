@@ -6,9 +6,9 @@ import { parseReport, ReportParseError } from '../server/reportParser';
 const dataDir = __dirname;
 
 describe('parseReport', () => {
-  it('parses element counts, summaries, and continuity metrics from a report file', () => {
+  it('parses element counts, summaries, and continuity metrics from a report file', async () => {
     const file = path.join(dataDir, 'data', 'sample-report.rpt');
-    const result = parseReport(file);
+    const result = await parseReport(file);
 
     expect(result.elementCount).toEqual({
       rainGages: 0,
@@ -61,21 +61,25 @@ describe('parseReport', () => {
     expect(result.flowRoutingContinuity.continuityErrorPercent).toBeCloseTo(1.078, 3);
   });
 
-  it('throws when a required element count is missing', () => {
+  it('throws when a required element count is missing', async () => {
     const file = path.join(dataDir, 'data', 'missing-field-report.rpt');
-    expect(() => parseReport(file)).toThrow(ReportParseError);
-    expect(() => parseReport(file)).toThrow(/Missing required element count: Number of links/);
+    await expect(parseReport(file)).rejects.toThrow(ReportParseError);
+    await expect(parseReport(file)).rejects.toThrow(
+      /Missing required element count: Number of links/
+    );
   });
 
-  it('throws when numeric fields cannot be parsed', () => {
+  it('throws when numeric fields cannot be parsed', async () => {
     const file = path.join(dataDir, 'data', 'invalid-number-report.rpt');
-    expect(() => parseReport(file)).toThrow(ReportParseError);
-    expect(() => parseReport(file)).toThrow(/Invalid numeric value for Number of nodes/);
+    await expect(parseReport(file)).rejects.toThrow(ReportParseError);
+    await expect(parseReport(file)).rejects.toThrow(
+      /Invalid numeric value for Number of nodes/
+    );
   });
 
-  it('throws when report file is empty', () => {
+  it('throws when report file is empty', async () => {
     const file = path.join(dataDir, 'data', 'empty-report.rpt');
-    expect(() => parseReport(file)).toThrow(ReportParseError);
-    expect(() => parseReport(file)).toThrow(/Report file is empty/);
+    await expect(parseReport(file)).rejects.toThrow(ReportParseError);
+    await expect(parseReport(file)).rejects.toThrow(/Report file is empty/);
   });
 });
