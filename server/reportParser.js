@@ -335,7 +335,7 @@ function parseFlowRoutingContinuity(lines) {
 }
 
 function toNumberOrNull(value) {
-  if (value === undefined || value === null || value === '') {
+  if (value == null || value === '') {
     return null;
   }
   const number = Number(value);
