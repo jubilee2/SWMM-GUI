@@ -330,7 +330,7 @@ describe('POST /api/inp-files/:id/report', () => {
     expect(findOneAndUpdate).toHaveBeenCalledTimes(1);
     const [filter, , options] = findOneAndUpdate.mock.calls[0];
     expect(filter._id.toHexString()).toBe(validId);
-    expect(options).toEqual({ returnDocument: 'after' });
+    expect(options).toEqual({ returnDocument: 'after', includeResultMetadata: true });
     expect(cleanedPath).toBe(uploadedPath);
   });
 

@@ -70,62 +70,61 @@ app.post('/api/inp-files/:id/report', upload.single('file'), async (req, res) =>
       fs.unlink(req.file.path, () => {});
     }
   };
-
-  const { id } = req.params;
-  if (!ObjectId.isValid(id)) {
-    cleanup();
-    return res.status(400).json({ error: 'Invalid INP file id' });
-  }
-
-  if (!req.file) {
-    return res.status(400).json({ error: 'No report uploaded' });
-  }
-
-  const ext = path.extname(req.file.originalname).toLowerCase();
-  if (ext !== '.rpt') {
-    cleanup();
-    return res.status(400).json({ error: 'Unsupported report type' });
-  }
-
-  let parsedReport;
   try {
-    parsedReport = parseReport(req.file.path);
-  } catch (err) {
-    cleanup();
-    if (err instanceof ReportParseError) {
-      return res.status(422).json({ error: err.message });
-    }
-    console.error('Failed to parse report', err);
-    return res.status(500).json({ error: 'Failed to parse report' });
-  }
-
-  const savedReport = {
-    ...parsedReport,
-    filename: req.file.originalname,
-    uploadedAt: new Date(),
-  };
-
-  try {
-    const db = getDb();
-    const result = await db.collection('parses').findOneAndUpdate(
-      { _id: new ObjectId(id) },
-      { $set: { report: savedReport } },
-      { 
-        returnDocument: 'after',
-        includeResultMetadata: true
-       }
-    );
-    cleanup();
-
-    if (!result?.value) {
-      return res.status(404).json({ error: 'INP file not found' });
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid INP file id' });
     }
 
-    return res.json(result.value.report);
-  } catch (err) {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No report uploaded' });
+    }
+
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    if (ext !== '.rpt') {
+      return res.status(400).json({ error: 'Unsupported report type' });
+    }
+
+    let parsedReport;
+    try {
+      parsedReport = parseReport(req.file.path);
+    } catch (err) {
+      if (err instanceof ReportParseError) {
+        return res.status(422).json({ error: err.message });
+      }
+      console.error('Failed to parse report', err);
+      return res.status(500).json({ error: 'Failed to parse report' });
+    }
+
+    const savedReport = {
+      ...parsedReport,
+      filename: req.file.originalname,
+      uploadedAt: new Date(),
+    };
+
+    try {
+      const db = getDb();
+      const result = await db.collection('parses').findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: { report: savedReport } },
+        { 
+          returnDocument: 'after',
+          includeResultMetadata: true
+        }
+      );
+
+      if (!result?.value) {
+        return res.status(404).json({ error: 'INP file not found' });
+      }
+
+      return res.json(result.value.report);
+    } catch (err) {
+      console.error('Failed to save report', err);
+      return res.status(500).json({ error: 'Failed to save report' });
+    }
+  }
+  finally {
     cleanup();
-    console.error('Failed to save report', err);
-    return res.status(500).json({ error: 'Failed to save report' });
   }
 });
 
