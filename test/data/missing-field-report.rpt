@@ -1,0 +1,142 @@
+  EPA STORM WATER MANAGEMENT MODEL - VERSION 5.2 (Build 5.2.4)
+  ------------------------------------------------------------
+
+  
+  *************
+  Element Count
+  *************
+  Number of rain gages ...... 0
+  Number of subcatchments ... 0
+  Number of nodes ........... 381
+  Number of pollutants ...... 0
+  Number of land uses ....... 0
+  
+  
+  ************
+  Node Summary
+  ************
+                                           Invert      Max.    Ponded    External
+  Name                 Type                 Elev.     Depth      Area    Inflow  
+  -------------------------------------------------------------------------------
+  S9                   JUNCTION              5.31      3.99       0.0
+  S8-1                 JUNCTION              7.72      2.48       0.0
+  S8                   JUNCTION              4.68      4.12       0.0
+  S7                   JUNCTION              4.47      4.83       0.0
+  S6-4                 JUNCTION              6.86      2.64       0.0
+  AA0                  OUTFALL               5.14      2.50       0.0
+  B0                   OUTFALL               3.47      3.00       0.0
+  YD0                  OUTFALL               4.34      2.10       0.0
+  YE0                  OUTFALL               6.59      1.70       0.0
+  YA0                  OUTFALL               2.04      2.70       0.0
+  YB0                  OUTFALL               2.04      3.00       0.0
+  
+  
+  ************
+  Link Summary
+  ************
+  Name             From Node        To Node          Type            Length    %Slope Roughness
+  ---------------------------------------------------------------------------------------------
+  S9-S8            S9               S8               CONDUIT          179.9    0.3502    0.0150
+  S8-1-S8          S8-1             S8               CONDUIT           68.5    4.4423    0.0150
+  S8-S7            S8               S7               CONDUIT          172.3    0.1219    0.0150
+  S7-S6            S7               S6               CONDUIT          352.0    0.3366    0.0150
+  S6-4-S6-3        S6-4             S6-3             CONDUIT          168.8    0.8297    0.0150
+  S6-3-1-S6-3      S6-3-1           S6-3             CONDUIT          242.5    0.0990    0.0150
+  S6-3-S6-2        S6-3             S6-2             CONDUIT          258.0    0.1977    0.0150
+  S6-2-2-S6-2-1    S6-2-2           S6-2-1           CONDUIT           62.0    0.9033    0.0150
+  S6-2-1-S6-2      S6-2-1           S6-2             CONDUIT          204.7    0.4105    0.0150
+  YB2-1-YB2        YB2-1            YB2              CONDUIT          239.4    0.3212    0.0150
+  YB2-2-YB2-1      YB2-2            YB2-1            CONDUIT          185.6    0.3319    0.0150
+  YB2-1-1-YB2-1    YB2-1-1          YB2-1            CONDUIT          208.5    0.1156    0.0150
+  YB6-1-YB6        YB6-1            YB6              CONDUIT           76.0    0.9461    0.0150
+  
+  
+  *********************
+  Cross Section Summary
+  *********************
+                                        Full     Full     Hyd.     Max.   No. of     Full
+  Conduit          Shape               Depth     Area     Rad.    Width  Barrels     Flow
+  ---------------------------------------------------------------------------------------
+  S9-S8            CIRCULAR             0.80     0.50     0.20     0.80        1     0.68
+  S8-1-S8          CIRCULAR             1.00     0.79     0.25     1.00        1     4.38
+  S8-S7            RECT_CLOSED          2.50     6.25     0.62     2.50        1    10.64
+  S7-S6            RECT_CLOSED          2.50     6.25     0.62     2.50        1    17.67
+  S6-4-S6-3        CIRCULAR             1.00     0.79     0.25     1.00        1     1.89
+  S6-3-1-S6-3      CIRCULAR             1.00     0.79     0.25     1.00        1     0.65
+  S6-3-S6-2        CIRCULAR             1.50     1.77     0.38     1.50        1     2.72
+  S6-2-2-S6-2-1    CIRCULAR             0.80     0.50     0.20     0.80        1     1.09
+  S6-2-1-S6-2      CIRCULAR             1.20     1.13     0.30     1.20        1     2.17
+  S6-2-S6-1        RECT_CLOSED          1.80     3.24     0.45     1.80        1     5.59
+  YA6-YA5          RECT_CLOSED          1.55     2.40     0.39     1.55        1     4.65
+  YA7-YA6          RECT_CLOSED          1.30     3.25     0.43     2.50        1     4.52
+  YA3-1-YA3        RECT_CLOSED          1.50     2.25     0.38     1.50        1     4.16
+  YA3-2-YA3-1      RECT_CLOSED          1.50     2.25     0.38     1.50        1     1.34
+  YA4-1-YA4        RECT_CLOSED          1.50     2.25     0.38     1.50        1     4.69
+  YA4-2-YA4-1      RECT_CLOSED          1.00     1.20     0.27     1.20        1     1.29
+  YA6-1-YA6        RECT_CLOSED          1.30     3.25     0.43     2.50        1     4.26
+  YB1-YB0          RECT_CLOSED          3.00    12.00     0.86     4.00        1    35.65
+  YB2-YB1          RECT_CLOSED          3.00    12.00     0.86     4.00        1    32.51
+  YB3-YB2          RECT_CLOSED          3.00    12.00     0.86     4.00        1    26.06
+  YB4-YB3          RECT_CLOSED          3.00    12.00     0.86     4.00        1     6.58
+  YB5-YB4          RECT_CLOSED          3.00     9.90     0.79     3.30        1    11.47
+  YB6-YB5          RECT_CLOSED          3.00     9.90     0.79     3.30        1    16.04
+  YB7-YB6          RECT_CLOSED          3.00     9.90     0.79     3.30        1    26.50
+  YB8-YB7          RECT_CLOSED          2.10     4.41     0.53     2.10        1     8.26
+  YB9-YB8          RECT_CLOSED          2.10     4.41     0.53     2.10        1    11.29
+  YB10-YB9         RECT_CLOSED          1.70     2.89     0.42     1.70        1     6.13
+  YB11-YB10        RECT_CLOSED          1.60     2.56     0.40     1.60        1     4.54
+  YB12-YB11        RECT_CLOSED          1.30     1.69     0.33     1.30        1     1.70
+  YB7-1-YB7        RECT_CLOSED          1.80     3.24     0.45     1.80        1    11.06
+  YB7-2-YB7-1      RECT_CLOSED          1.80     3.24     0.45     1.80        1     5.77
+  YB7-3-YB7-2      RECT_CLOSED          1.50     2.25     0.38     1.50        1     6.71
+  YB7-4-YB7-3      RECT_CLOSED          1.50     2.25     0.38     1.50        1     5.20
+  YB7-5-YB7-4      RECT_CLOSED          1.50     2.25     0.38     1.50        1     7.99
+  YB7-6-YB7-5      RECT_CLOSED          1.20     1.44     0.30     1.20        1     2.20
+  YB7-7-YB7-6      RECT_CLOSED          1.20     1.44     0.30     1.20        1     2.73
+  YB7-8-YB7-7      RECT_CLOSED          1.20     1.44     0.30     1.20        1     1.00
+  YB2-1-YB2        RECT_CLOSED          1.20     1.44     0.30     1.20        1     2.44
+  YB2-2-YB2-1      RECT_CLOSED          1.20     1.44     0.30     1.20        1     2.48
+  YB2-1-1-YB2-1    CIRCULAR             1.20     1.13     0.30     1.20        1     1.15
+  YB6-1-YB6        RECT_CLOSED          1.60     5.44     0.54     3.40        1    23.51
+  
+  
+  ****************
+  Analysis Options
+  ****************
+  Flow Units ............... CMS
+  Process Models:
+    Rainfall/Runoff ........ NO
+    RDII ................... NO
+    Snowmelt ............... NO
+    Groundwater ............ NO
+    Flow Routing ........... YES
+    Ponding Allowed ........ YES
+    Water Quality .......... NO
+  Flow Routing Method ...... DYNWAVE
+  Surcharge Method ......... EXTRAN
+  Starting Date ............ 08/23/2018 03:00:00
+  Ending Date .............. 08/25/2018 03:00:00
+  Antecedent Dry Days ...... 0.0
+  Report Time Step ......... 01:00:00
+  Routing Time Step ........ 1.00 sec
+  Variable Time Step ....... YES
+  Maximum Trials ........... 8
+  Number of Threads ........ 1
+  Head Tolerance ........... 0.005000 m
+  
+  
+  *********************        Volume        Volume
+  Flow Routing Continuity        hectare-m      10^6 ltr
+  *********************     ---------     ---------
+  Dry Weather Inflow .......         0.000         0.000
+  Wet Weather Inflow .......         0.000         0.000
+  Groundwater Inflow .......         0.000         0.000
+  RDII Inflow ..............         0.000         0.000
+  External Inflow ..........         0.260         2.602
+  External Outflow .........         0.238         2.380
+  Flooding Loss ............         0.000         0.000
+  Evaporation Loss .........         0.000         0.000
+  Exfiltration Loss ........         0.000         0.000
+  Initial Stored Volume ....         0.131         1.307
+  Final Stored Volume ......         0.149         1.486
+  Continuity Error (%) .....         1.078
