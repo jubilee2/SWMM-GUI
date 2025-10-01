@@ -311,7 +311,7 @@ describe('POST /api/inp-files/:id/report', () => {
     const file = path.join(__dirname, 'data', 'sample-report.rpt');
     const res = await request(app)
       .post(`/api/inp-files/${validId}/report`)
-      .attach('report', file);
+      .attach('file', file);
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
@@ -341,7 +341,7 @@ describe('POST /api/inp-files/:id/report', () => {
     const unlinkSpy = vi.spyOn(fs, 'unlink').mockImplementation((_, cb) => cb && cb());
     const { default: app } = await import('../server.js');
     const file = path.join(__dirname, 'data', 'sample-report.rpt');
-    const res = await request(app).post('/api/inp-files/not-an-id/report').attach('report', file);
+    const res = await request(app).post('/api/inp-files/not-an-id/report').attach('file', file);
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('Invalid INP file id');
     expect(parseSpy).not.toHaveBeenCalled();
@@ -363,7 +363,7 @@ describe('POST /api/inp-files/:id/report', () => {
     const file = path.join(__dirname, 'data', 'sample.txt');
     const res = await request(app)
       .post(`/api/inp-files/${validId}/report`)
-      .attach('report', file);
+      .attach('file', file);
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('Unsupported report type');
     expect(unlinkSpy).toHaveBeenCalled();
@@ -385,7 +385,7 @@ describe('POST /api/inp-files/:id/report', () => {
     const file = path.join(__dirname, 'data', 'sample-report.rpt');
     const res = await request(app)
       .post(`/api/inp-files/${validId}/report`)
-      .attach('report', file);
+      .attach('file', file);
     expect(res.status).toBe(422);
     expect(res.body.error).toBe('Report malformed');
     expect(unlinkSpy).toHaveBeenCalled();
@@ -405,7 +405,7 @@ describe('POST /api/inp-files/:id/report', () => {
     const file = path.join(__dirname, 'data', 'sample-report.rpt');
     const res = await request(app)
       .post(`/api/inp-files/${validId}/report`)
-      .attach('report', file);
+      .attach('file', file);
     expect(res.status).toBe(404);
     expect(res.body.error).toBe('INP file not found');
     expect(findOneAndUpdate).toHaveBeenCalled();
@@ -429,7 +429,7 @@ describe('POST /api/inp-files/:id/report', () => {
     const file = path.join(__dirname, 'data', 'sample-report.rpt');
     const res = await request(app)
       .post(`/api/inp-files/${validId}/report`)
-      .attach('report', file);
+      .attach('file', file);
     expect(res.status).toBe(500);
     expect(res.body.error).toBe('Failed to save report');
     expect(unlinkSpy).toHaveBeenCalled();
